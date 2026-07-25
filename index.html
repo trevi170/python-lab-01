@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.1.1.6 LAB: The print() function</title>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1d23; color: #cdd6f4; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999; }
+  .modal { background: #1e2230; border: 1px solid #3d4455; border-radius: 12px; padding: 28px 32px; width: 420px; }
+  .modal h2 { color: #89b4fa; font-size: 17px; margin-bottom: 6px; }
+  .modal p { color: #6c7086; font-size: 12px; margin-bottom: 20px; }
+  .modal label { display: block; font-size: 12px; color: #a6adc8; margin-bottom: 4px; margin-top: 12px; }
+  .modal input { width: 100%; background: #2e3440; border: 1px solid #3d4455; border-radius: 6px; padding: 8px 10px; color: #cdd6f4; font-size: 13px; outline: none; }
+  .modal input:focus { border-color: #89b4fa; }
+  .modal button { margin-top: 20px; width: 100%; background: #89b4fa; border: none; border-radius: 6px; padding: 10px; color: #1a1d23; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .modal button:disabled { background: #3d4455; color: #6c7086; cursor: not-allowed; }
+  .topbar { background: #181b21; border-bottom: 1px solid #2e3440; padding: 0 16px; height: 44px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .topbar-nav { display: flex; align-items: center; gap: 12px; color: #89b4fa; font-size: 13px; }
+  .topbar-nav button { background: none; border: none; color: #89b4fa; cursor: pointer; font-size: 18px; }
+  .lab-badge { background: #f5a623; color: #1a1d23; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+  .progress-bars { background: #181b21; padding: 6px 16px; display: flex; gap: 32px; border-bottom: 1px solid #2e3440; flex-shrink: 0; }
+  .prog-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #6c7086; }
+  .prog-track { width: 100px; height: 5px; background: #2e3440; border-radius: 3px; }
+  .prog-fill { height: 100%; border-radius: 3px; }
+  .prog-fill.module { width: 10%; background: #89b4fa; }
+  .prog-fill.section { width: 33%; background: #a6e3a1; }
+  .toolbar { background: #1e2230; border-bottom: 1px solid #2e3440; height: 38px; display: flex; align-items: center; padding: 0 8px; gap: 4px; flex-shrink: 0; }
+  .toolbar button { background: none; border: none; color: #6c7086; cursor: pointer; padding: 5px 8px; border-radius: 4px; font-size: 13px; }
+  .toolbar button:hover { background: #2e3440; color: #cdd6f4; }
+  .toolbar button.run { background: #89b4fa; color: #1a1d23; font-weight: 600; }
+  .toolbar .sep { width: 1px; height: 20px; background: #2e3440; margin: 0 4px; }
+  .score-display { margin-left: auto; font-size: 12px; color: #a6adc8; display: flex; align-items: center; gap: 6px; }
+  .score-num { font-weight: 700; color: #a6e3a1; font-size: 14px; }
+  .pdf-btn { background: #a6e3a1 !important; color: #1a1d23 !important; font-weight: 700 !important; display: none; }
+  .main { display: flex; flex: 1; overflow: hidden; }
+  .left-panel { width: 44%; border-right: 1px solid #2e3440; overflow-y: auto; padding: 20px 22px; flex-shrink: 0; }
+  .left-panel h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin-bottom: 6px; margin-top: 16px; }
+  .left-panel h2:first-child { margin-top: 0; }
+  .left-panel p { color: #a6adc8; line-height: 1.6; margin-bottom: 8px; font-size: 13px; }
+  code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 12px; }
+  .task-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #2e3440; background: #181b21; transition: all 0.3s; }
+  .task-item.active { border-color: #89b4fa; background: #1a2035; }
+  .task-item.done { border-color: #a6e3a1; background: #0d1f14; }
+  .task-item.locked { opacity: 0.45; }
+  .task-status { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3d4455; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; }
+  .task-item.done .task-status { border-color: #a6e3a1; background: #a6e3a1; color: #1a1d23; }
+  .task-item.active .task-status { border-color: #89b4fa; }
+  .task-label { font-size: 12px; color: #6c7086; line-height: 1.5; flex: 1; }
+  .task-item.active .task-label { color: #cdd6f4; }
+  .task-item.done .task-label { color: #a6e3a1; }
+  .task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
+  .task-item.done .task-pts { color: #a6e3a1; font-weight: 700; }
+  .complete-banner { display: none; background: #0d1f14; border: 1px solid #a6e3a1; border-radius: 8px; padding: 10px 14px; margin: 10px 0 4px; font-size: 13px; color: #a6e3a1; text-align: center; }
+  .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .editor-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .editor-header { background: #1e2230; padding: 6px 12px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #2e3440; }
+  .editor-body { display: flex; flex: 1; overflow: hidden; }
+  .line-nums { background: #181b21; padding: 10px; color: #4a4f68; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; text-align: right; user-select: none; min-width: 36px; border-right: 1px solid #2e3440; }
+  #editor { flex: 1; background: #1e2230; color: #cdd6f4; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; padding: 10px 14px; border: none; outline: none; resize: none; tab-size: 4; }
+  .console-area { border-top: 1px solid #2e3440; flex-shrink: 0; }
+  .console-header { background: #181b21; padding: 6px 12px; font-size: 12px; color: #6c7086; }
+  .console-output { background: #181b21; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 13px; min-height: 70px; max-height: 100px; overflow-y: auto; white-space: pre-wrap; }
+  .console-output .err { color: #f38ba8; }
+  .console-output .sys { color: #6c7086; }
+  .console-output .ok { color: #a6e3a1; }
+  .ai-panel { border-top: 2px solid #89b4fa; display: flex; flex-direction: column; flex-shrink: 0; }
+  .ai-header { background: #181b21; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2e3440; }
+  .ai-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #89b4fa; }
+  .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #a6e3a1; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+  .ai-chat { max-height: 110px; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #1a1d23; }
+  .msg { display: flex; gap: 8px; align-items: flex-start; }
+  .msg-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+  .msg-avatar.ai { background: #89b4fa; color: #1a1d23; }
+  .msg-avatar.user { background: #cba6f7; color: #1a1d23; }
+  .msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg.user .msg-bubble { background: #313552; }
+  .hint-chips { display: flex; gap: 6px; padding: 5px 12px; flex-wrap: wrap; background: #181b21; border-top: 1px solid #2e3440; }
+  .chip { background: #2e3440; border: 1px solid #3d4455; border-radius: 12px; padding: 3px 10px; font-size: 11px; color: #89b4fa; cursor: pointer; white-space: nowrap; }
+  .chip:hover { background: #3d4455; }
+  .ai-input-row { display: flex; gap: 8px; padding: 7px 12px; border-top: 1px solid #2e3440; background: #181b21; }
+  .ai-input-row input { flex: 1; background: #2e3440; border: 1px solid #3d4455; border-radius: 6px; padding: 6px 10px; color: #cdd6f4; font-size: 12px; outline: none; }
+  .ai-input-row input:focus { border-color: #89b4fa; }
+  .ai-input-row button { background: #89b4fa; border: none; border-radius: 6px; padding: 6px 14px; color: #1a1d23; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .nav-btn { background: transparent; border: 1px solid #89b4fa; color: #89b4fa; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .nav-btn.next { background: #89b4fa; color: #1a1d23; font-weight: 600; }
+  .typing-indicator span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #89b4fa; margin: 0 2px; animation: bounce 1s infinite; }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)} }
+</style>
+</head>
+<body>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Student Information</h2>
+    <p>Please fill in your details before starting the lab.</p>
+    <label>First Name *</label>
+    <input type="text" id="firstName" placeholder="e.g. Maria">
+    <label>Last Name *</label>
+    <input type="text" id="lastName" placeholder="e.g. Garcia">
+    <label>Course Name *</label>
+    <input type="text" id="courseName" placeholder="e.g. Introduction to Python">
+    <label>Section *</label>
+    <input type="text" id="sectionName" placeholder="e.g. CIS-101-01">
+    <label>Instructor *</label>
+    <input type="text" id="instructorName" placeholder="e.g. Prof. Smith">
+    <button id="startBtn" onclick="startLab()">Start Lab</button>
+  </div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-weight:700;color:#89b4fa;font-size:15px;">Python<span style="color:#f5a623;">PI</span></span>
+    <span class="lab-badge">LAB</span>
+  </div>
+  <div class="topbar-nav">
+    <button>&#171;</button>
+    <span>2.1.1.6 LAB: The print() function</span>
+    <button>&#187;</button>
+  </div>
+  <span id="studentLabel" style="font-size:12px;color:#6c7086;"></span>
+</div>
+
+<div class="progress-bars">
+  <div class="prog-item"><span>MODULE (10%)</span><div class="prog-track"><div class="prog-fill module"></div></div></div>
+  <div class="prog-item"><span>SECTION (33%)</span><div class="prog-track"><div class="prog-fill section"></div></div></div>
+</div>
+
+<div class="toolbar">
+  <button class="run" onclick="runCode()">▶ Run</button>
+  <div class="sep"></div>
+  <button onclick="copyEditor()">⧉ Copy</button>
+  <button onclick="resetCode()">↺ Reset</button>
+  <div class="score-display">Score: <span class="score-num" id="scoreDisplay">0</span> / 14</div>
+  <div style="margin-left:12px;">
+    <button class="pdf-btn" id="pdfBtn" onclick="generatePDF()">⬇ Download Report</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Left -->
+  <div class="left-panel">
+    <h2>Estimated time</h2><p>5–10 minutes</p>
+    <h2>Level of difficulty</h2><p>Very easy</p>
+    <h2>Objectives</h2>
+    <ul style="padding-left:16px;list-style:disc;color:#a6adc8;font-size:13px;line-height:1.9;">
+      <li>Becoming familiar with the <code>print()</code> function</li>
+      <li>Experimenting with Python code</li>
+    </ul>
+    <h2>Scenario</h2>
+    <p>The <code>print()</code> command simply prints a line to the screen. Complete the 5 tasks below in order.</p>
+
+    <div class="complete-banner" id="completeBanner">🎉 Lab complete! <strong>14 / 14 points</strong> — Download your report above.</div>
+
+    <h2 style="margin-top:14px;">Tasks</h2>
+
+    <div class="task-item active" id="task1">
+      <div class="task-status" id="t1s"></div>
+      <div class="task-label"><strong>Task 1</strong> — Print <code>Hello, Python!</code> using <code>print()</code> with double quotes</div>
+      <div class="task-pts" id="t1p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task2">
+      <div class="task-status" id="t2s"></div>
+      <div class="task-label"><strong>Task 2</strong> — Use <code>print()</code> to display your first name</div>
+      <div class="task-pts" id="t2p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task3">
+      <div class="task-status" id="t3s"></div>
+      <div class="task-label"><strong>Task 3</strong> — Cause a <code>NameError</code> by removing the quotes from inside <code>print()</code></div>
+      <div class="task-pts" id="t3p">2 pts</div>
+    </div>
+    <div class="task-item locked" id="task4">
+      <div class="task-status" id="t4s"></div>
+      <div class="task-label"><strong>Task 4</strong> — Cause a <code>SyntaxError</code> by removing the parentheses from <code>print</code></div>
+      <div class="task-pts" id="t4p">2 pts</div>
+    </div>
+    <div class="task-item locked" id="task5">
+      <div class="task-status" id="t5s"></div>
+      <div class="task-label"><strong>Task 5</strong> — Write <strong>two</strong> <code>print()</code> statements on separate lines using <strong>single quotes</strong> in at least one</div>
+      <div class="task-pts" id="t5p">4 pts</div>
+    </div>
+
+    <div style="height:48px;"></div>
+    <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
+      <button class="nav-btn">← Prev</button>
+      <button class="nav-btn next">Next →</button>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div class="right-panel">
+    <div class="editor-area">
+      <div class="editor-header">📄 main.py</div>
+      <div class="editor-body">
+        <div class="line-nums" id="lineNums">1</div>
+        <textarea id="editor" spellcheck="false" onkeydown="handleTab(event)" oninput="updateLines()"># Write your code below</textarea>
+      </div>
+    </div>
+    <div class="console-area">
+      <div class="console-header">Console &gt;_</div>
+      <div class="console-output" id="consoleOutput"><span class="sys">Ready. Click ▶ Run to execute your code.</span></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-header">
+        <div class="ai-title"><div class="ai-dot"></div>AI Tutor</div>
+        <span style="font-size:11px;color:#6c7086;">Powered by Claude</span>
+      </div>
+      <div class="ai-chat" id="aiChat">
+        <div class="msg ai">
+          <div class="msg-avatar ai">AI</div>
+          <div class="msg-bubble">Hi! I'm your Python tutor. Complete the 5 tasks on the left in order. Ask me anything!</div>
+        </div>
+      </div>
+      <div class="hint-chips">
+        <div class="chip" onclick="askChip('What does print() do?')">What does print() do?</div>
+        <div class="chip" onclick="askChip('Why do I need quotes around text?')">Why quotes?</div>
+        <div class="chip" onclick="askChip('What happens if I remove the parentheses?')">Remove parentheses?</div>
+        <div class="chip" onclick="askChip('What is a SyntaxError?')">What is SyntaxError?</div>
+        <div class="chip" onclick="askChip('Can I use single quotes instead of double quotes?')">Single vs double quotes</div>
+      </div>
+      <div class="ai-input-row">
+        <input type="text" id="aiInput" placeholder="Ask your tutor anything…" onkeydown="if(event.key==='Enter')sendMessage()">
+        <button onclick="sendMessage()">Ask ↗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let student = {};
+  let labStartTime = null;
+  // currentTask: 1–5, 6 = all done
+  let currentTask = 1;
+  const taskLog = [];
+
+  function checkModal() {
+    const filled = ['firstName','lastName','courseName','sectionName','instructorName'].every(id => document.getElementById(id).value.trim() !== '');
+    const btn = document.getElementById('startBtn');
+    btn.disabled = !filled;
+    btn.style.opacity = filled ? '1' : '0.5';
+    btn.style.cursor = filled ? 'pointer' : 'not-allowed';
+    btn.style.background = filled ? '#89b4fa' : '#3d4455';
+    btn.style.color = filled ? '#1a1d23' : '#6c7086';
+  }
+
+  // Attach listeners after DOM loads
+  window.addEventListener('DOMContentLoaded', () => {
+    ['firstName','lastName','courseName','sectionName','instructorName'].forEach(id => {
+      document.getElementById(id).addEventListener('input', checkModal);
+      document.getElementById(id).addEventListener('keyup', checkModal);
+    });
+    checkModal();
+  });
+
+  function startLab() {
+    const fn = document.getElementById('firstName').value.trim();
+    const ln = document.getElementById('lastName').value.trim();
+    const cn = document.getElementById('courseName').value.trim();
+    const sn = document.getElementById('sectionName').value.trim();
+    const ins = document.getElementById('instructorName').value.trim();
+    if (!fn || !ln || !cn || !sn || !ins) return;
+    student = { firstName: fn, lastName: ln, course: cn, section: sn, instructor: ins };
+    labStartTime = new Date();
+    document.getElementById('modalOverlay').style.display = 'none';
+    document.getElementById('studentLabel').textContent = `${student.firstName} ${student.lastName}`;
+    addAiMessage(`Welcome ${student.firstName}! Start with Task 1 — type print("Hello, Python!") in the editor and click Run.`);
+  }
+
+  /* ── Editor helpers ── */
+  function updateLines() {
+    const n = document.getElementById('editor').value.split('\n').length;
+    document.getElementById('lineNums').innerHTML = Array.from({length:n},(_,i)=>i+1).join('<br>');
+  }
+  function handleTab(e) {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const ta = document.getElementById('editor'), s = ta.selectionStart;
+    ta.value = ta.value.substring(0,s) + '    ' + ta.value.substring(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s + 4;
+    updateLines();
+  }
+  function resetCode() {
+    document.getElementById('editor').value = '# Write your code below';
+    updateLines();
+    document.getElementById('consoleOutput').innerHTML = '<span class="sys">Code reset.</span>';
+  }
+  function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ── Python simulator ── */
+  function simulatePython(code) {
+    const lines = code.split('\n');
+    const results = [];
+    let error = null;
+
+    for (let raw of lines) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+
+      // missing parentheses:  print "x" or print 'x'
+      if (/^print\s+['"]/.test(line)) {
+        error = { type:'SyntaxError', msg:"SyntaxError: Missing parentheses in call to 'print'" }; break;
+      }
+      // print() with no-quote identifier: print(word)
+      const noQ = line.match(/^print\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)$/);
+      if (noQ) {
+        error = { type:'NameError', msg:`NameError: name '${noQ[1]}' is not defined` }; break;
+      }
+      // empty print
+      if (/^print\s*\(\s*\)$/.test(line)) { results.push(''); continue; }
+      // normal print(...)
+      const pm = line.match(/^print\s*\((.+)\)$/);
+      if (pm) {
+        const arg = pm[1];
+        const sepM = arg.match(/sep\s*=\s*(['"])(.*?)\1/);
+        const sep = sepM ? sepM[2] : ' ';
+        const tokens = [];
+        const re = /(['"])(.*?)\1/g; let m;
+        while ((m = re.exec(arg)) !== null) tokens.push(m[2]);
+        results.push(tokens.length ? tokens.join(sep) : arg.replace(/['"]/g,''));
+        continue;
+      }
+      error = { type:'SyntaxError', msg:'SyntaxError: invalid syntax' }; break;
+    }
+    return { results, error };
+  }
+
+  /* ── Run ── */
+  function runCode() {
+    const code = document.getElementById('editor').value;
+    const { results, error } = simulatePython(code);
+    const out = document.getElementById('consoleOutput');
+    const now = new Date().toLocaleTimeString();
+
+    if (error) {
+      out.innerHTML = `<span class="err">Traceback (most recent call last):\n  File "main.py"\n${escHtml(error.msg)}</span>`;
+      gradeError(code, error, now);
+    } else {
+      out.innerHTML = results.length
+        ? results.map(r=>`<span class="ok">${escHtml(r)}</span>`).join('\n')
+        : '<span class="sys">(no output)</span>';
+      gradeSuccess(code, results, now);
+    }
+  }
+
+  /* ── Grading — only checks the CURRENT task ── */
+  function gradeError(code, error, now) {
+    if (currentTask === 3 && error.type === 'NameError') {
+      completeTask(3, 'Triggered a NameError by removing quotes', code, error.msg, now, 2);
+      addAiMessage(`✅ Task 3 done! A NameError means Python saw a word without quotes and didn't know what it meant. Now try Task 4 — remove the parentheses from print and run it.`);
+    } else if (currentTask === 4 && error.type === 'SyntaxError' && error.msg.includes('parentheses')) {
+      completeTask(4, 'Triggered a SyntaxError by removing parentheses', code, error.msg, now, 2);
+      addAiMessage(`✅ Task 4 done! SyntaxError means Python couldn't read the code structure. Now for Task 5 — write two print() statements on separate lines and use single quotes in at least one.`);
+    } else {
+      // helpful nudge
+      if (currentTask === 1 || currentTask === 2 || currentTask === 5) {
+        setTimeout(() => offerErrorHelp(error), 400);
+      }
+    }
+  }
+
+  function gradeSuccess(code, results, now) {
+    const codeLines = code.split('\n').map(l=>l.trim()).filter(l=>l && !l.startsWith('#'));
+
+    if (currentTask === 1) {
+      // Must output exactly "Hello, Python!" and code uses double quotes
+      const hasOutput = results.some(r => r === 'Hello, Python!');
+      const hasDouble = codeLines.some(l => /print\s*\(\s*"Hello,\s*Python!"\s*\)/.test(l));
+      if (hasOutput && hasDouble) {
+        completeTask(1, 'Printed "Hello, Python!" with double quotes', code, results.join('\n'), now, 3);
+        addAiMessage(`✅ Task 1 done! Now for Task 2 — use print() to display your first name (${student.firstName}).`);
+      } else if (hasOutput && !hasDouble) {
+        addAiMessage(`Almost! You printed the right text, but Task 1 specifically asks for double quotes: print("Hello, Python!")`);
+      } else {
+        addAiMessage(`Not quite yet. Make sure you type: print("Hello, Python!") — capitalization and punctuation matter!`);
+      }
+    }
+
+    else if (currentTask === 2) {
+      const fn = student.firstName.toLowerCase();
+      const hasName = results.some(r => r.toLowerCase() === fn || r.toLowerCase().includes(fn));
+      if (hasName) {
+        completeTask(2, `Printed their name (${student.firstName})`, code, results.join('\n'), now, 3);
+        addAiMessage(`✅ Task 2 done! Now for Task 3 — write print(${student.firstName}) WITHOUT quotes and run it. What error appears?`);
+      } else {
+        addAiMessage(`I don't see your name in the output yet. Try: print("${student.firstName}") and click Run.`);
+      }
+    }
+
+    else if (currentTask === 3) {
+      // They ran without error — nudge them
+      addAiMessage(`For Task 3 you need to cause an error. Remove the quotes from inside print() — for example: print(${student.firstName}) — then click Run.`);
+    }
+
+    else if (currentTask === 4) {
+      // They ran without error — nudge them
+      addAiMessage(`For Task 4 you need to cause a SyntaxError. Remove the parentheses — for example: print "Hello" — then click Run.`);
+    }
+
+    else if (currentTask === 5) {
+      const hasSingle = codeLines.some(l => /print\s*\(\s*'[^']*'\s*\)/.test(l));
+      const printCount = codeLines.filter(l => /print\s*\(/.test(l)).length;
+      if (hasSingle && printCount >= 2) {
+        completeTask(5, 'Used single quotes and two print() statements', code, results.join('\n'), now, 4);
+        addAiMessage(`✅ Task 5 done! You've completed all 5 tasks — excellent work! Download your report above.`);
+      } else if (!hasSingle) {
+        addAiMessage(`Almost there! Make sure at least one of your print() statements uses single quotes — like print('Hello').`);
+      } else if (printCount < 2) {
+        addAiMessage(`Good use of single quotes! Now add a second print() statement on a new line so you have at least two.`);
+      }
+    }
+  }
+
+  function completeTask(num, desc, code, output, time, pts) {
+    const ids = ['','task1','task2','task3','task4','task5'];
+    const sids = ['','t1s','t2s','t3s','t4s','t5s'];
+    const pids = ['','t1p','t2p','t3p','t4p','t5p'];
+    const ptsMap = [0,3,3,2,2,4];
+
+    document.getElementById(ids[num]).classList.remove('active','locked');
+    document.getElementById(ids[num]).classList.add('done');
+    document.getElementById(sids[num]).textContent = '✓';
+    document.getElementById(pids[num]).textContent = `${ptsMap[num]}/${ptsMap[num]} pts`;
+
+    taskLog.push({ task:`Task ${num}`, desc, code, output, time, pts });
+    currentTask = num + 1;
+    updateScore();
+
+    if (currentTask <= 5) {
+      document.getElementById(ids[currentTask]).classList.remove('locked');
+      document.getElementById(ids[currentTask]).classList.add('active');
+    } else {
+      document.getElementById('completeBanner').style.display = 'block';
+      document.getElementById('pdfBtn').style.display = 'inline-block';
+    }
+  }
+
+  function updateScore() {
+    const map = [0,3,3,2,2,4];
+    const earned = taskLog.reduce((s,t) => s + t.pts, 0);
+    document.getElementById('scoreDisplay').textContent = earned;
+  }
+
+  function offerErrorHelp(error) {
+    if (error.type === 'NameError') addAiMessage(`You got a NameError! Python saw a word without quotes and didn't know what it was. Wrap your text in quotes: print("Hello").`);
+    else if (error.type === 'SyntaxError') addAiMessage(`SyntaxError! Python can't understand the code structure. Check your parentheses and quotes are correct.`);
+  }
+
+  /* ── AI Tutor ── */
+  async function sendMessage() {
+    const input = document.getElementById('aiInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    addUserMessage(text);
+    const tid = addTypingIndicator();
+    try {
+      const code = document.getElementById('editor').value;
+      const sys = `You are a friendly Python tutor for beginners on a lab about the print() function. Keep answers 2-4 sentences, warm, jargon-free. Student's code:\n\`\`\`python\n${code}\n\`\`\`\nCurrently on Task ${currentTask} of 5. Never give full solutions — guide with hints only.`;
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1000, system:sys, messages:[{role:'user',content:text}] })
+      });
+      const data = await res.json();
+      removeTypingIndicator(tid);
+      addAiMessage(data.content?.[0]?.text || "I'm having trouble connecting. Try again!");
+    } catch(e) {
+      removeTypingIndicator(tid);
+      addAiMessage("Connection issue — try refreshing!");
+    }
+  }
+
+  function askChip(q) { document.getElementById('aiInput').value = q; sendMessage(); }
+  function addUserMessage(t) { appendMsg('user','You',t); }
+  function addAiMessage(t) { appendMsg('ai','AI',t); }
+  function appendMsg(role, label, text) {
+    const chat = document.getElementById('aiChat');
+    chat.innerHTML += `<div class="msg ${role}"><div class="msg-avatar ${role}">${label}</div><div class="msg-bubble">${escHtml(text)}</div></div>`;
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function addTypingIndicator() {
+    const id = 'ty'+Date.now(), chat = document.getElementById('aiChat');
+    chat.innerHTML += `<div class="msg ai" id="${id}"><div class="msg-avatar ai">AI</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+    chat.scrollTop = chat.scrollHeight; return id;
+  }
+  function removeTypingIndicator(id) { const el=document.getElementById(id); if(el)el.remove(); }
+
+  /* ── PDF ── */
+  function generatePDF() {
+    // Build PDF as raw bytes manually, then trigger download via blob
+    const lines = buildPDFLines();
+    const blob = new Blob([lines], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Lab_Report_${student.lastName}_${student.firstName}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function buildPDFLines() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    const timeStr = labStartTime ? labStartTime.toLocaleTimeString() : '';
+
+    // Helper to encode text for PDF streams
+    const esc = s => String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+
+    const objects = [];
+    const offsets = [];
+
+    const addObj = (content) => { objects.push(content); return objects.length; };
+
+    // Object 1: catalog
+    addObj('<< /Type /Catalog /Pages 2 0 R >>');
+
+    // We'll build page content first, then set up pages
+    const taskDefs = [
+      {l:'Task 1', d:'Print "Hello, Python!" with double quotes', p:'3/3 pts'},
+      {l:'Task 2', d:'Print student first name', p:'3/3 pts'},
+      {l:'Task 3', d:'Trigger NameError by removing quotes', p:'2/2 pts'},
+      {l:'Task 4', d:'Trigger SyntaxError by removing parentheses', p:'2/2 pts'},
+      {l:'Task 5', d:'Single quotes + two print() statements', p:'4/4 pts'},
+    ];
+
+    let contentLines = [];
+    const W = 612, margin = 50;
+    let y = 720;
+    const lineH = 16;
+
+    const text = (x, yy, str, size, bold) => {
+      contentLines.push(`BT /F${bold?'B':'R'} ${size} Tf ${x} ${yy} Td (${esc(str)}) Tj ET`);
+    };
+    const rect = (x, yy, w, h, fill) => {
+      contentLines.push(`${fill} rg ${x} ${yy} ${w} ${h} re f`);
+    };
+    const line = (x1,y1,x2,y2) => {
+      contentLines.push(`0.5 0.8 1 RG 1.5 w ${x1} ${y1} m ${x2} ${y2} l S`);
+    };
+
+    // Header
+    rect(0, 760, 612, 50, '0.12 0.13 0.19');
+    text(margin, 790, 'Python Institute', 16, true);
+    text(margin, 775, '2.1.1.6 LAB: The print() function - Lab Report', 10, false);
+    text(W-margin-60, 790, '14/14', 18, true);
+
+    y = 740;
+
+    // Student info box
+    rect(margin, y-80, W-margin*2, 90, '0.96 0.96 0.98');
+    text(margin+8, y-10, 'Student Information', 11, true);
+    text(margin+8, y-26, `Name: ${student.firstName} ${student.lastName}`, 10, false);
+    text(margin+280, y-26, `Date: ${dateStr}`, 10, false);
+    text(margin+8, y-42, `Course: ${student.course}`, 10, false);
+    text(margin+280, y-42, `Section: ${student.section}`, 10, false);
+    text(margin+8, y-58, `Instructor: ${student.instructor}`, 10, false);
+    text(margin+280, y-58, `Start Time: ${timeStr}`, 10, false);
+    text(margin+8, y-74, 'Lab: 2.1.1.6 — The print() function', 10, false);
+
+    y -= 100;
+
+    // Grade banner
+    rect(margin, y-20, W-margin*2, 28, '0.05 0.12 0.08');
+    text(margin+10, y-6, 'Final Grade: 14 / 14 points  (100%)', 12, true);
+    y -= 40;
+
+    // Task breakdown header
+    text(margin, y, 'Task Breakdown', 12, true);
+    y -= 8;
+    line(margin, y, W-margin, y);
+    y -= 18;
+
+    taskDefs.forEach((t, i) => {
+      rect(margin, y-4, W-margin*2, 18, i%2===0?'0.96 0.96 0.98':'1 1 1');
+      text(margin+6, y+8, t.l, 9, true);
+      text(margin+60, y+8, t.d, 9, false);
+      text(W-margin-50, y+8, t.p, 9, true);
+      y -= 20;
+    });
+
+    y -= 16;
+
+    // Submission details
+    text(margin, y, 'Submission Details', 12, true);
+    y -= 8;
+    line(margin, y, W-margin, y);
+    y -= 20;
+
+    taskLog.forEach(entry => {
+      if (y < 120) { contentLines.push(''); y = 720; } // simple page break marker
+
+      // Task header bar
+      rect(margin, y-4, W-margin*2, 18, '0.12 0.13 0.19');
+      text(margin+6, y+8, `${entry.task} — ${entry.desc} | ${entry.pts} pts | ${entry.time}`, 8, true);
+      y -= 24;
+
+      // Code
+      const cLines = entry.code.split('\n').slice(0,10);
+      rect(margin, y - cLines.length*lineH, W-margin*2, cLines.length*lineH+8, '0.09 0.11 0.13');
+      cLines.forEach((cl, i) => {
+        text(margin+6, y - i*lineH, cl.length>80?cl.slice(0,80)+'...':cl, 8, false);
+      });
+      y -= cLines.length*lineH + 14;
+
+      // Output
+      const oLines = (entry.output||'(no output)').split('\n').slice(0,5);
+      rect(margin, y - oLines.length*lineH, W-margin*2, oLines.length*lineH+8, '0.08 0.12 0.08');
+      oLines.forEach((ol, i) => {
+        text(margin+6, y - i*lineH, ol.length>80?ol.slice(0,80)+'...':ol, 8, false);
+      });
+      y -= oLines.length*lineH + 24;
+    });
+
+    // Footer
+    rect(0, 0, 612, 30, '0.12 0.13 0.19');
+    text(margin, 14, `${student.firstName} ${student.lastName} | ${student.course} | Generated: ${now.toLocaleString()}`, 7, false);
+    text(W-margin-40, 14, 'Page 1 of 1', 7, false);
+
+    const streamContent = contentLines.join('\n');
+
+    // Object 3: page content stream
+    addObj(`<< /Length ${streamContent.length} >>\nstream\n${streamContent}\nendstream`);
+
+    // Object 2: pages (must reference obj 3 for content, obj 4 for font)
+    // We'll use simple built-in fonts
+    addObj('/F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    addObj('/F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+
+    // Build the actual PDF bytes
+    let pdf = '%PDF-1.4\n';
+    const objOffsets = [];
+
+    // Catalog (obj 1)
+    objOffsets.push(pdf.length);
+    pdf += `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`;
+
+    // Pages (obj 2)
+    objOffsets.push(pdf.length);
+    pdf += `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`;
+
+    // Page (obj 3)
+    objOffsets.push(pdf.length);
+    pdf += `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]\n  /Contents 4 0 R\n  /Resources << /Font << /FR 5 0 R /FB 6 0 R >> >> >>\nendobj\n`;
+
+    // Content stream (obj 4) — replace font references
+    const finalStream = contentLines
+      .join('\n')
+      .replace(/\/FB /g, '/FB ')
+      .replace(/BT \/FR/g, 'BT /FR')
+      .replace(/BT \/FB/g, 'BT /FB')
+      // fix bold/regular font refs
+      .replace(/\/F1 /g,'/FR ')
+      .replace(/\/F2 /g,'/FB ');
+
+    const stream2 = contentLines.join('\n')
+      .replace(/BT \/FR /g,'BT /FR ')
+      .replace(/BT \/FB /g,'BT /FB ');
+
+    // Rebuild stream with correct font names
+    const s2 = contentLines.map(l => {
+      return l.replace(/\/FB (\d+) Tf/, '/FB $1 Tf').replace(/\/FR (\d+) Tf/, '/FR $1 Tf');
+    }).join('\n');
+
+    objOffsets.push(pdf.length);
+    pdf += `4 0 obj\n<< /Length ${s2.length} >>\nstream\n${s2}\nendstream\nendobj\n`;
+
+    // Font Regular (obj 5)
+    objOffsets.push(pdf.length);
+    pdf += `5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n`;
+
+    // Font Bold (obj 6)
+    objOffsets.push(pdf.length);
+    pdf += `6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\nendobj\n`;
+
+    // Cross-reference table
+    const xrefOffset = pdf.length;
+    pdf += `xref\n0 7\n0000000000 65535 f \n`;
+    objOffsets.forEach(o => {
+      pdf += String(o).padStart(10,'0') + ' 00000 n \n';
+    });
+
+    pdf += `trailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+    return pdf;
+  }
+    const W = doc.internal.pageSize.getWidth(), margin = 50;
+    let y = 50;
+
+    const chk = (n) => { if (y+n > doc.internal.pageSize.getHeight()-40) { doc.addPage(); y=50; } };
+
+    doc.setFillColor(30,34,48); doc.rect(0,0,W,70,'F');
+    doc.setTextColor(137,180,250); doc.setFontSize(18); doc.setFont('helvetica','bold');
+    doc.text('Python Institute', margin, 30);
+    doc.setFontSize(11); doc.setTextColor(200,200,200);
+    doc.text('Lab Report — 2.1.1.6: The print() function', margin, 50);
+    doc.setFillColor(166,227,161); doc.roundedRect(W-margin-80,15,80,40,6,6,'F');
+    doc.setTextColor(30,34,48); doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text('14/14', W-margin-70, 42);
+    y = 95;
+
+    // Student info
+    doc.setFillColor(245,245,250); doc.rect(margin,y,W-margin*2,112,'F');
+    doc.setDrawColor(200,200,210); doc.rect(margin,y,W-margin*2,112);
+    y+=16;
+    const row = (lbl1,val1,lbl2,val2) => {
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(50,50,80);
+      doc.text(lbl1, margin+10, y); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
+      doc.text(val1, margin+70, y);
+      if (lbl2) { doc.setFont('helvetica','bold'); doc.setTextColor(50,50,80); doc.text(lbl2, margin+270, y); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.text(val2, margin+330, y); }
+      y+=16;
+    };
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(50,50,80);
+    doc.text('Student Information', margin+10, y); y+=14;
+    row('Name:', `${student.firstName} ${student.lastName}`, 'Date:', new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}));
+    row('Course:', student.course, 'Section:', student.section);
+    row('Instructor:', student.instructor, 'Start:', labStartTime.toLocaleTimeString());
+    row('Lab:', '2.1.1.6 — The print() function');
+    y+=14;
+
+    // Grade bar
+    doc.setFillColor(13,31,20); doc.rect(margin,y,W-margin*2,36,'F');
+    doc.setTextColor(166,227,161); doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('Final Grade: 14 / 14 points  (100%)', margin+12, y+23); y+=52;
+
+    // Task summary
+    doc.setTextColor(30,30,50); doc.setFontSize(12); doc.setFont('helvetica','bold');
+    doc.text('Task Breakdown', margin, y); y+=6;
+    doc.setDrawColor(137,180,250); doc.setLineWidth(1.5); doc.line(margin,y,W-margin,y); y+=14;
+    const tDefs=[
+      {l:'Task 1',d:'Print "Hello, Python!" using double quotes',p:'3/3'},
+      {l:'Task 2',d:'Print student first name',p:'3/3'},
+      {l:'Task 3',d:'Trigger a NameError by removing quotes',p:'2/2'},
+      {l:'Task 4',d:'Trigger a SyntaxError by removing parentheses',p:'2/2'},
+      {l:'Task 5',d:'Use single quotes + two print() statements',p:'4/4'},
+    ];
+    tDefs.forEach((t,i)=>{
+      chk(26);
+      doc.setFillColor(...(i%2===0?[245,245,250]:[255,255,255]));
+      doc.rect(margin,y-10,W-margin*2,24,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(50,50,80); doc.text(t.l,margin+8,y+5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.text(t.d,margin+60,y+5);
+      doc.setFont('helvetica','bold'); doc.setTextColor(30,100,50); doc.text(t.p,W-margin-30,y+5);
+      y+=24;
+    });
+    y+=16;
+
+    // Submission details
+    chk(30);
+    doc.setTextColor(30,30,50); doc.setFontSize(12); doc.setFont('helvetica','bold');
+    doc.text('Submission Details', margin, y); y+=6;
+    doc.setDrawColor(137,180,250); doc.setLineWidth(1.5); doc.line(margin,y,W-margin,y); y+=16;
+
+    taskLog.forEach(entry=>{
+      chk(100);
+      doc.setFillColor(30,34,48); doc.rect(margin,y-12,W-margin*2,20,'F');
+      doc.setTextColor(137,180,250); doc.setFontSize(10); doc.setFont('helvetica','bold');
+      doc.text(`${entry.task} — ${entry.desc}  |  ${entry.pts} pts  |  ${entry.time}`, margin+8, y+1);
+      y+=18;
+      const cLines = entry.code.split('\n');
+      const cH = cLines.length*13+16; chk(cH+10);
+      doc.setFillColor(24,27,33); doc.rect(margin,y,W-margin*2,cH,'F');
+      doc.setTextColor(180,200,230); doc.setFont('courier','normal'); doc.setFontSize(9);
+      let cy=y+12; cLines.forEach(cl=>{ doc.text(cl.length>85?cl.slice(0,85)+'…':cl,margin+8,cy); cy+=13; });
+      y+=cH+4;
+      const oLines=(entry.output||'(no output)').split('\n');
+      const oH=oLines.length*13+16; chk(oH+10);
+      doc.setFillColor(20,30,20); doc.rect(margin,y,W-margin*2,oH,'F');
+      doc.setTextColor(166,227,161); doc.setFont('courier','normal'); doc.setFontSize(9);
+      let oy=y+12; oLines.forEach(ol=>{ doc.text(ol.length>85?ol.slice(0,85)+'…':ol,margin+8,oy); oy+=13; });
+      y+=oH+20;
+    });
+
+    // Footer
+    const pages=doc.internal.getNumberOfPages();
+    for(let i=1;i<=pages;i++){
+      doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150,150,150); doc.setFont('helvetica','normal');
+      doc.text(`${student.firstName} ${student.lastName} | ${student.course} | ${new Date().toLocaleString()}`,margin,doc.internal.pageSize.getHeight()-20);
+      doc.text(`Page ${i} of ${pages}`,W-margin-40,doc.internal.pageSize.getHeight()-20);
+    }
+    doc.save(`Lab_Report_${student.lastName}_${student.firstName}.pdf`);
+  }
+
+  updateLines();
+</script>
+</body>
+</html>
