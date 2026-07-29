@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.1.1.6 LAB: The print() function</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1d23; color: #cdd6f4; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+.topbar { background: #181b21; border-bottom: 1px solid #2e3440; padding: 0 16px; height: 44px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-nav { display: flex; align-items: center; gap: 12px; color: #89b4fa; font-size: 13px; }
+.lab-badge { background: #f5a623; color: #1a1d23; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+.progress-bars { background: #181b21; padding: 6px 16px; display: flex; gap: 32px; border-bottom: 1px solid #2e3440; flex-shrink: 0; }
+.prog-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #6c7086; }
+.prog-track { width: 100px; height: 5px; background: #2e3440; border-radius: 3px; }
+.prog-fill { height: 100%; border-radius: 3px; }
+.toolbar { background: #1e2230; border-bottom: 1px solid #2e3440; height: 38px; display: flex; align-items: center; padding: 0 8px; gap: 4px; flex-shrink: 0; }
+.toolbar button { background: none; border: none; color: #6c7086; cursor: pointer; padding: 5px 8px; border-radius: 4px; font-size: 13px; }
+.toolbar button:hover { background: #2e3440; color: #cdd6f4; }
+.run-btn { background: #89b4fa !important; color: #1a1d23 !important; font-weight: 600 !important; }
+.sep { width: 1px; height: 20px; background: #2e3440; margin: 0 4px; }
+.score-display { margin-left: auto; font-size: 12px; color: #a6adc8; display: flex; align-items: center; gap: 6px; }
+.score-num { font-weight: 700; color: #a6e3a1; font-size: 14px; }
+.pdf-btn { background: #a6e3a1 !important; color: #1a1d23 !important; font-weight: 700 !important; display: none; }
+.main { display: flex; flex: 1; overflow: hidden; }
+.left-panel { width: 44%; border-right: 1px solid #2e3440; overflow-y: auto; padding: 20px 22px; flex-shrink: 0; }
+.left-panel h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin-bottom: 6px; margin-top: 16px; }
+.left-panel h2:first-child { margin-top: 0; }
+.left-panel p { color: #a6adc8; line-height: 1.6; margin-bottom: 8px; font-size: 13px; }
+code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 12px; }
+.task-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #2e3440; background: #181b21; transition: all 0.3s; }
+.task-item.active { border-color: #89b4fa; background: #1a2035; }
+.task-item.done { border-color: #a6e3a1; background: #0d1f14; }
+.task-item.locked { opacity: 0.45; }
+.task-status { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3d4455; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; }
+.task-item.done .task-status { border-color: #a6e3a1; background: #a6e3a1; color: #1a1d23; }
+.task-item.active .task-status { border-color: #89b4fa; }
+.task-label { font-size: 12px; color: #6c7086; line-height: 1.5; flex: 1; }
+.task-item.active .task-label { color: #cdd6f4; }
+.task-item.done .task-label { color: #a6e3a1; }
+.task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
+.task-item.done .task-pts { color: #a6e3a1; font-weight: 700; }
+.complete-banner { display: none; background: #0d1f14; border: 1px solid #a6e3a1; border-radius: 8px; padding: 10px 14px; margin: 10px 0 4px; font-size: 13px; color: #a6e3a1; text-align: center; }
+.right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.editor-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.editor-header { background: #1e2230; padding: 6px 12px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #2e3440; }
+.editor-body { display: flex; flex: 1; overflow: hidden; }
+.line-nums { background: #181b21; padding: 10px; color: #4a4f68; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; text-align: right; user-select: none; min-width: 36px; border-right: 1px solid #2e3440; }
+#editor { flex: 1; background: #1e2230; color: #cdd6f4; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; padding: 10px 14px; border: none; outline: none; resize: none; tab-size: 4; }
+.console-area { border-top: 1px solid #2e3440; flex-shrink: 0; }
+.console-header { background: #181b21; padding: 6px 12px; font-size: 12px; color: #6c7086; }
+.console-output { background: #181b21; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 13px; min-height: 70px; max-height: 100px; overflow-y: auto; white-space: pre-wrap; }
+.err { color: #f38ba8; } .sys { color: #6c7086; } .ok { color: #a6e3a1; }
+.ai-panel { border-top: 2px solid #89b4fa; display: flex; flex-direction: column; flex-shrink: 0; }
+.ai-header { background: #181b21; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2e3440; }
+.ai-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #89b4fa; }
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #a6e3a1; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.ai-chat { max-height: 110px; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #1a1d23; }
+.msg { display: flex; gap: 8px; align-items: flex-start; }
+.msg-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+.msg-avatar.ai { background: #89b4fa; color: #1a1d23; }
+.msg-avatar.user { background: #cba6f7; color: #1a1d23; }
+.msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; }
+.msg.user { flex-direction: row-reverse; }
+.msg.user .msg-bubble { background: #313552; }
+.hint-chips { display: flex; gap: 6px; padding: 5px 12px; flex-wrap: wrap; background: #181b21; border-top: 1px solid #2e3440; }
+.chip { background: #2e3440; border: 1px solid #3d4455; border-radius: 12px; padding: 3px 10px; font-size: 11px; color: #89b4fa; cursor: pointer; white-space: nowrap; }
+.chip:hover { background: #3d4455; }
+.ai-input-row { display: flex; gap: 8px; padding: 7px 12px; border-top: 1px solid #2e3440; background: #181b21; }
+.ai-input-row input { flex: 1; background: #2e3440; border: 1px solid #3d4455; border-radius: 6px; padding: 6px 10px; color: #cdd6f4; font-size: 12px; outline: none; }
+.ai-input-row input:focus { border-color: #89b4fa; }
+.ai-input-row button { background: #89b4fa; border: none; border-radius: 6px; padding: 6px 14px; color: #1a1d23; font-size: 12px; font-weight: 600; cursor: pointer; }
+.nav-btn { background: transparent; border: 1px solid #89b4fa; color: #89b4fa; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.nav-btn.next { background: #89b4fa; color: #1a1d23; font-weight: 600; }
+.typing-indicator span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #89b4fa; margin: 0 2px; animation: bounce 1s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)} }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-weight:700;color:#89b4fa;font-size:15px;">Python<span style="color:#f5a623;">PI</span></span>
+    <span class="lab-badge">LAB</span>
+  </div>
+  <div class="topbar-nav">
+    <span>2.1.1.6 LAB: The print() function</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="studentLabel" style="font-size:12px;color:#6c7086;"></span>
+    <button onclick="window.location.href='https://stcportal.ddns.net'" style="background:none;border:1px solid #3d4455;border-radius:5px;padding:3px 10px;color:#6c7086;font-size:11px;cursor:pointer;">&#8592; Portal</button>
+  </div>
+</div>
+
+<div class="progress-bars">
+  <div class="prog-item"><span>MODULE (10%)</span><div class="prog-track"><div class="prog-fill" style="width:10%;background:#89b4fa;"></div></div></div>
+  <div class="prog-item"><span>SECTION (33%)</span><div class="prog-track"><div class="prog-fill" style="width:33%;background:#a6e3a1;"></div></div></div>
+</div>
+
+<div class="toolbar">
+  <button class="run-btn" onclick="runCode()">&#9654; Run</button>
+  <div class="sep"></div>
+  <button onclick="copyEditor()">Copy</button>
+  <button onclick="resetCode()">Reset</button>
+  <div class="score-display">Score: <span class="score-num" id="scoreDisplay">0</span> / 14</div>
+  <div style="margin-left:12px;">
+    <button class="pdf-btn" id="pdfBtn" onclick="generatePDF()">Download Report</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left-panel">
+    <h2>Estimated time</h2><p>5-10 minutes</p>
+    <h2>Level of difficulty</h2><p>Very easy</p>
+    <h2>Objectives</h2>
+    <ul style="padding-left:16px;list-style:disc;color:#a6adc8;font-size:13px;line-height:1.9;">
+      <li>Becoming familiar with the <code>print()</code> function</li>
+      <li>Experimenting with Python code</li>
+    </ul>
+    <h2>Scenario</h2>
+    <p>The <code>print()</code> command simply prints a line to the screen. Complete the 5 tasks below in order.</p>
+    <div class="complete-banner" id="completeBanner">&#127881; Lab complete! 14 / 14 points — Download your report above.</div>
+    <h2 style="margin-top:14px;">Tasks</h2>
+    <div class="task-item active" id="task1">
+      <div class="task-status" id="t1s"></div>
+      <div class="task-label"><strong>Task 1</strong> — Print <code>Hello, Python!</code> using <code>print()</code> with double quotes</div>
+      <div class="task-pts" id="t1p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task2">
+      <div class="task-status" id="t2s"></div>
+      <div class="task-label"><strong>Task 2</strong> — Use <code>print()</code> to display your first name</div>
+      <div class="task-pts" id="t2p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task3">
+      <div class="task-status" id="t3s"></div>
+      <div class="task-label"><strong>Task 3</strong> — Cause a <code>NameError</code> by removing quotes from inside <code>print()</code></div>
+      <div class="task-pts" id="t3p">2 pts</div>
+    </div>
+    <div class="task-item locked" id="task4">
+      <div class="task-status" id="t4s"></div>
+      <div class="task-label"><strong>Task 4</strong> — Cause a <code>SyntaxError</code> by removing parentheses from <code>print</code></div>
+      <div class="task-pts" id="t4p">2 pts</div>
+    </div>
+    <div class="task-item locked" id="task5">
+      <div class="task-status" id="t5s"></div>
+      <div class="task-label"><strong>Task 5</strong> — Write two <code>print()</code> statements on separate lines using single quotes in at least one</div>
+      <div class="task-pts" id="t5p">4 pts</div>
+    </div>
+    <div style="height:48px;"></div>
+    <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
+      <button class="nav-btn">Prev</button>
+      <button class="nav-btn next">Next</button>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="editor-area">
+      <div class="editor-header">main.py</div>
+      <div class="editor-body">
+        <div class="line-nums" id="lineNums">1</div>
+        <textarea id="editor" spellcheck="false" oninput="updateLines()" onkeydown="handleTab(event)"># Write your code below</textarea>
+      </div>
+    </div>
+    <div class="console-area">
+      <div class="console-header">Console</div>
+      <div class="console-output" id="consoleOutput"><span class="sys">Ready. Click Run to execute your code.</span></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-header">
+        <div class="ai-title"><div class="ai-dot"></div>AI Tutor</div>
+        <span style="font-size:11px;color:#6c7086;">Powered by Claude</span>
+      </div>
+      <div class="ai-chat" id="aiChat">
+        <div class="msg ai">
+          <div class="msg-avatar ai">AI</div>
+          <div class="msg-bubble" id="welcomeMsg">Welcome! Loading your info...</div>
+        </div>
+      </div>
+      <div class="hint-chips">
+        <div class="chip" onclick="askChip('What does print() do?')">What does print() do?</div>
+        <div class="chip" onclick="askChip('Why do I need quotes?')">Why quotes?</div>
+        <div class="chip" onclick="askChip('What is a SyntaxError?')">SyntaxError?</div>
+        <div class="chip" onclick="askChip('What is a NameError?')">NameError?</div>
+        <div class="chip" onclick="askChip('Single vs double quotes?')">Single vs double quotes</div>
+      </div>
+      <div class="ai-input-row">
+        <input type="text" id="aiInput" placeholder="Ask your tutor anything..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button onclick="sendMessage()">Ask</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var student = {};
+var labStartTime = new Date();
+var currentTask = 1;
+var taskLog = [];
+
+// ── Read URL params on load ──
+window.addEventListener('DOMContentLoaded', function() {
+  var params = new URLSearchParams(window.location.search);
+  student = {
+    firstName:  params.get('firstName')  || 'Student',
+    lastName:   params.get('lastName')   || '',
+    course:     params.get('course')     || 'ITSE-2421',
+    section:    params.get('section')    || '',
+    instructor: params.get('instructor') || 'Mr. Hector Trevino'
+  };
+  var isCompleted = params.get('completed') === 'true';
+  document.getElementById('studentLabel').textContent = student.firstName + ' ' + student.lastName;
+
+  if (isCompleted) {
+    for (var i = 1; i <= 5; i++) { completeTaskSilent(i); }
+    document.getElementById('completeBanner').style.display = 'block';
+    document.getElementById('pdfBtn').style.display = 'inline-block';
+    document.getElementById('scoreDisplay').textContent = '14';
+    document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! You already completed this lab. You can review or download your report.';
+  } else {
+    document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 — type print("Hello, Python!") and click Run.';
+  }
+});
+
+function updateLines() {
+  var n = document.getElementById('editor').value.split('\n').length;
+  var html = '';
+  for (var i = 1; i <= n; i++) { html += i + '<br>'; }
+  document.getElementById('lineNums').innerHTML = html;
+}
+
+function handleTab(e) {
+  if (e.key !== 'Tab') return;
+  e.preventDefault();
+  var ta = document.getElementById('editor'), s = ta.selectionStart;
+  ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(ta.selectionEnd);
+  ta.selectionStart = ta.selectionEnd = s + 4;
+  updateLines();
+}
+
+function resetCode() {
+  document.getElementById('editor').value = '# Write your code below';
+  updateLines();
+  document.getElementById('consoleOutput').innerHTML = '<span class="sys">Code reset.</span>';
+}
+
+function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function simulatePython(code) {
+  var lines = code.split('\n'), results = [], error = null;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line || line.charAt(0) === '#') continue;
+    if (/^print\s+['"]/.test(line)) { error = { type:'SyntaxError', msg:"SyntaxError: Missing parentheses in call to 'print'" }; break; }
+    var noQ = line.match(/^print\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)$/);
+    if (noQ) { error = { type:'NameError', msg:"NameError: name '"+noQ[1]+"' is not defined" }; break; }
+    if (/^print\s*\(\s*\)$/.test(line)) { results.push(''); continue; }
+    var pm = line.match(/^print\s*\((.+)\)$/);
+    if (pm) {
+      var arg = pm[1], sepM = arg.match(/sep\s*=\s*(['"])(.*?)\1/), sep = sepM ? sepM[2] : ' ';
+      var tokens = [], re = /(['"])(.*?)\1/g, m;
+      while ((m = re.exec(arg)) !== null) tokens.push(m[2]);
+      results.push(tokens.length ? tokens.join(sep) : arg.replace(/['"]/g,''));
+      continue;
+    }
+    error = { type:'SyntaxError', msg:'SyntaxError: invalid syntax' }; break;
+  }
+  return { results:results, error:error };
+}
+
+function runCode() {
+  var code = document.getElementById('editor').value;
+  var sim = simulatePython(code);
+  var out = document.getElementById('consoleOutput');
+  var now = new Date().toLocaleTimeString();
+  if (sim.error) {
+    out.innerHTML = '<span class="err">Traceback (most recent call last):\n  File "main.py"\n'+escHtml(sim.error.msg)+'</span>';
+    gradeError(code, sim.error, now);
+  } else {
+    out.innerHTML = sim.results.length ? sim.results.map(function(r){return '<span class="ok">'+escHtml(r)+'</span>';}).join('\n') : '<span class="sys">(no output)</span>';
+    gradeSuccess(code, sim.results, now);
+  }
+}
+
+function gradeError(code, error, now) {
+  if (currentTask === 3 && error.type === 'NameError') {
+    completeTask(3,'Triggered a NameError by removing quotes',code,error.msg,now,2);
+    addAiMessage('Task 3 done! NameError means Python saw a word without quotes. Now try Task 4 — remove the parentheses from print and run it.');
+  } else if (currentTask === 4 && error.type === 'SyntaxError' && error.msg.indexOf('parentheses') !== -1) {
+    completeTask(4,'Triggered a SyntaxError by removing parentheses',code,error.msg,now,2);
+    addAiMessage('Task 4 done! Now for Task 5 — write two print() statements on separate lines and use single quotes in at least one.');
+  } else {
+    if (currentTask === 3) addAiMessage('For Task 3, cause a NameError. Try: print('+( student.firstName||'hello')+') without quotes.');
+    else if (currentTask === 4) addAiMessage('For Task 4, cause a SyntaxError. Try: print "Hello" without parentheses.');
+  }
+}
+
+function gradeSuccess(code, results, now) {
+  var codeLines = code.split('\n').map(function(l){return l.trim();}).filter(function(l){return l && l.charAt(0)!=='#';});
+  if (currentTask === 1) {
+    var hasOutput = results.some(function(r){return r==='Hello, Python!';});
+    var hasDouble = codeLines.some(function(l){return /print\s*\(\s*"Hello,\s*Python!"\s*\)/.test(l);});
+    if (hasOutput && hasDouble) { completeTask(1,'Printed Hello, Python! with double quotes',code,results.join('\n'),now,3); addAiMessage('Task 1 done! Now for Task 2 — use print() to display your first name ('+student.firstName+').'); }
+    else if (hasOutput) addAiMessage('Almost! Task 1 needs double quotes: print("Hello, Python!")');
+    else addAiMessage('Not quite. Type exactly: print("Hello, Python!") — watch the capital P and exclamation mark!');
+  } else if (currentTask === 2) {
+    var fn = student.firstName.toLowerCase();
+    var hasName = results.some(function(r){return r.toLowerCase().indexOf(fn)!==-1;});
+    if (hasName) { completeTask(2,'Printed their name ('+student.firstName+')',code,results.join('\n'),now,3); addAiMessage('Task 2 done! Now for Task 3 — write print('+student.firstName+') WITHOUT quotes and run it.'); }
+    else addAiMessage('I do not see your name yet. Try: print("'+student.firstName+'") and click Run.');
+  } else if (currentTask === 3) {
+    addAiMessage('For Task 3 you need to cause an error. Remove the quotes — type print('+student.firstName+') without quotes, then Run.');
+  } else if (currentTask === 4) {
+    addAiMessage('For Task 4 you need a SyntaxError. Remove the parentheses — type: print "Hello" without (), then Run.');
+  } else if (currentTask === 5) {
+    var hasSingle = codeLines.some(function(l){return /print\s*\(\s*'[^']*'\s*\)/.test(l);});
+    var printCount = codeLines.filter(function(l){return /print\s*\(/.test(l);}).length;
+    if (hasSingle && printCount >= 2) { completeTask(5,'Used single quotes and two print() statements',code,results.join('\n'),now,4); addAiMessage('Task 5 done! All tasks complete — excellent work! Download your report.'); }
+    else if (!hasSingle) addAiMessage("Almost! Use single quotes in at least one print() — like print('Hello')");
+    else addAiMessage('Good! Now add a second print() statement on a new line.');
+  }
+}
+
+function completeTaskSilent(num) {
+  var taskEls=['','task1','task2','task3','task4','task5'];
+  var statusEls=['','t1s','t2s','t3s','t4s','t5s'];
+  var ptsEls=['','t1p','t2p','t3p','t4p','t5p'];
+  var ptsMap=[0,3,3,2,2,4];
+  var el=document.getElementById(taskEls[num]); if(el) el.className='task-item done';
+  var sel=document.getElementById(statusEls[num]); if(sel) sel.textContent='\u2713';
+  var pel=document.getElementById(ptsEls[num]); if(pel) pel.textContent=ptsMap[num]+'/'+ptsMap[num]+' pts';
+  currentTask=6;
+}
+
+function completeTask(num, desc, code, output, time, pts) {
+  var taskEls=['','task1','task2','task3','task4','task5'];
+  var statusEls=['','t1s','t2s','t3s','t4s','t5s'];
+  var ptsEls=['','t1p','t2p','t3p','t4p','t5p'];
+  var ptsMap=[0,3,3,2,2,4];
+  document.getElementById(taskEls[num]).className='task-item done';
+  document.getElementById(statusEls[num]).textContent='\u2713';
+  document.getElementById(ptsEls[num]).textContent=ptsMap[num]+'/'+ptsMap[num]+' pts';
+  taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
+  currentTask=num+1; updateScore();
+  if (currentTask<=5) document.getElementById(taskEls[currentTask]).className='task-item active';
+  else { document.getElementById('completeBanner').style.display='block'; document.getElementById('pdfBtn').style.display='inline-block'; }
+}
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = taskLog.reduce(function(s,t){return s+t.pts;},0);
+}
+
+function generatePDF() {
+  var now = new Date();
+  var info = [
+    'Student: '+student.firstName+' '+student.lastName,
+    'Course: '+student.course+'   Section: '+student.section,
+    'Instructor: '+student.instructor,
+    'Date: '+now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'   Start: '+labStartTime.toLocaleTimeString(),
+    'Lab: 2.1.1.6 - The print() function',
+    'Final Grade: 14 / 14 points (100%)','',
+    'TASK BREAKDOWN',
+    'Task 1 - Print Hello, Python! with double quotes ............ 3/3 pts',
+    'Task 2 - Print student first name .......................... 3/3 pts',
+    'Task 3 - Trigger NameError by removing quotes .............. 2/2 pts',
+    'Task 4 - Trigger SyntaxError removing parentheses .......... 2/2 pts',
+    'Task 5 - Single quotes + two print() statements ............ 4/4 pts',''
+  ];
+  taskLog.forEach(function(t){
+    info.push('--- '+t.task+' | '+t.pts+' pts | '+t.time+' ---','Code:');
+    t.code.split('\n').slice(0,15).forEach(function(l){info.push('  '+l.substring(0,80));});
+    info.push('Output:');
+    (t.output||'(no output)').split('\n').slice(0,5).forEach(function(l){info.push('  '+l.substring(0,80));});
+    info.push('');
+  });
+  info.push('Generated: '+now.toLocaleString());
+  var sl=['BT','/F1 11 Tf','50 750 Td','14 TL','(Python Institute - Lab Report) Tj','0 -20 Td','/F1 9 Tf','12 TL'];
+  info.forEach(function(line){
+    sl.push('('+line.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\(')+') Tj','T*');
+  });
+  sl.push('ET');
+  var stream=sl.join('\n'), pdf='%PDF-1.4\n', offsets=[];
+  offsets.push(pdf.length); pdf+='1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
+  offsets.push(pdf.length); pdf+='2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
+  offsets.push(pdf.length); pdf+='3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
+  offsets.push(pdf.length); pdf+='4 0 obj\n<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream\nendobj\n';
+  offsets.push(pdf.length); pdf+='5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n';
+  var xref=pdf.length;
+  pdf+='xref\n0 6\n0000000000 65535 f \n';
+  offsets.forEach(function(o){pdf+=String(o).padStart(10,'0')+' 00000 n \n';});
+  pdf+='trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+  var blob=new Blob([pdf],{type:'application/pdf'}), url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='Lab_Report_'+student.lastName+'_'+student.firstName+'.pdf';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+async function sendMessage() {
+  var input=document.getElementById('aiInput'), text=input.value.trim();
+  if (!text) return; input.value='';
+  addUserMessage(text); var tid=addTypingIndicator();
+  try {
+    var res=await fetch('/.netlify/functions/tutor',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system:'You are a friendly Python tutor for beginners on a lab about the print() function. Keep answers 2-4 sentences, warm, jargon-free. Student: '+student.firstName+'. Currently on Task '+currentTask+' of 5. Never give full solutions.',messages:[{role:'user',content:text}]})});
+    var data=await res.json(); removeTypingIndicator(tid);
+    addAiMessage(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!");
+  } catch(e) { removeTypingIndicator(tid); addAiMessage("Connection issue — the AI tutor needs Netlify to work. The lab grading still works!"); }
+}
+
+function askChip(q){document.getElementById('aiInput').value=q;sendMessage();}
+function addUserMessage(t){appendMsg('user','You',t);}
+function addAiMessage(t){appendMsg('ai','AI',t);}
+function appendMsg(role,label,text){
+  var chat=document.getElementById('aiChat'),div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML='<div class="msg-avatar '+role+'">'+label+'</div><div class="msg-bubble">'+escHtml(text)+'</div>';
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+function addTypingIndicator(){
+  var id='ty'+Date.now(),chat=document.getElementById('aiChat'),div=document.createElement('div');
+  div.className='msg ai'; div.id=id;
+  div.innerHTML='<div class="msg-avatar ai">AI</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight; return id;
+}
+function removeTypingIndicator(id){var el=document.getElementById(id);if(el)el.remove();}
+updateLines();
+</script>
+</body>
+</html>
