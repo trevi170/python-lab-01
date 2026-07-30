@@ -225,6 +225,9 @@ var labStartTime = new Date();
 var currentTask = 1;
 var taskLog = [];
 var labInitialized = false;
+var savedPoints = 0;
+var progressSaveQueue = Promise.resolve();
+var progressSaveErrorShown = false;
 
 function initLab() {
   if (labInitialized) return;
@@ -266,6 +269,8 @@ function initLab() {
 
   if (completed === 'true') {
     for (var i = 1; i <= 5; i++) { completeTaskSilent(i); }
+    currentTask = 6;
+    savedPoints = LAB_PTS;
     document.getElementById('completeBanner').style.display = 'block';
     document.getElementById('pdfBtn').style.display = 'inline-block';
     document.getElementById('scoreDisplay').textContent = '14';
@@ -278,36 +283,116 @@ function initLab() {
 // The script is at the end of the page, so the interface is ready now. The
 // guard also makes this safe if a browser fires DOMContentLoaded afterward.
 initLab();
+loadSavedProgress();
 
-async function saveLabComplete() {
+function completedTaskCountForPoints(points) {
+  if (points >= 14) return 5;
+  if (points >= 10) return 4;
+  if (points >= 8) return 3;
+  if (points >= 6) return 2;
+  if (points >= 3) return 1;
+  return 0;
+}
+
+async function loadSavedProgress() {
   var studentId = sessionStorage.getItem('lab_student_id');
   if (!studentId) return;
   try {
-    var checkRes = await fetch(SUPABASE_URL + '/rest/v1/lab_progress?student_id=eq.' + studentId + '&lab_num=eq.' + LAB_NUM, {
+    var progressRes = await fetch(SUPABASE_URL + '/rest/v1/lab_progress?student_id=eq.' + encodeURIComponent(studentId) + '&lab_num=eq.' + LAB_NUM + '&limit=1', {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
+    if (!progressRes.ok) throw new Error('Progress load failed (' + progressRes.status + ')');
+    var rows = await progressRes.json();
+    if (!rows || !rows.length || taskLog.length > 0 || currentTask > 1) return;
+
+    var record = rows[0];
+    var points = Math.max(0, Math.min(LAB_PTS, Number(record.points) || 0));
+    var doneCount = record.completed ? 5 : completedTaskCountForPoints(points);
+    if (!doneCount) return;
+
+    savedPoints = points;
+    for (var i = 1; i <= doneCount; i++) completeTaskSilent(i);
+    currentTask = doneCount >= 5 ? 6 : doneCount + 1;
+    updateScore();
+
+    if (currentTask <= 5) {
+      document.getElementById('task' + currentTask).className = 'task-item active';
+      document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! Your progress was restored. Continue with Task ' + currentTask + '.';
+      addAiMessage('I restored your saved progress. You are ready for Task ' + currentTask + '.');
+    } else {
+      savedPoints = LAB_PTS;
+      document.getElementById('completeBanner').style.display = 'block';
+      document.getElementById('pdfBtn').style.display = 'inline-block';
+      document.getElementById('scoreDisplay').textContent = String(LAB_PTS);
+      document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! You already completed this lab.';
+    }
+  } catch(e) {
+    console.error('Could not load saved progress:', e);
+  }
+}
+
+function queueProgressSave(points, isComplete) {
+  progressSaveQueue = progressSaveQueue.then(function() {
+    return saveLabProgress(points, isComplete);
+  });
+}
+
+async function saveLabProgress(points, isComplete) {
+  var studentId = sessionStorage.getItem('lab_student_id');
+  if (!studentId) return;
+  try {
+    var filter = '?student_id=eq.' + encodeURIComponent(studentId) + '&lab_num=eq.' + LAB_NUM;
+    var checkRes = await fetch(SUPABASE_URL + '/rest/v1/lab_progress' + filter, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!checkRes.ok) throw new Error('Progress check failed (' + checkRes.status + ')');
     var existing = await checkRes.json();
+
+    // Never replace saved progress with an earlier attempt.
+    if (!isComplete && existing && existing[0] &&
+        (existing[0].completed || Number(existing[0].points || 0) > points)) return;
+
     var method = (existing && existing.length > 0) ? 'PATCH' : 'POST';
-    var url = SUPABASE_URL + '/rest/v1/lab_progress' + (method === 'PATCH' ? '?student_id=eq.' + studentId + '&lab_num=eq.' + LAB_NUM : '');
+    var url = SUPABASE_URL + '/rest/v1/lab_progress' + (method === 'PATCH' ? filter : '');
+    var payload = {
+      student_id: String(studentId),
+      lab_num: LAB_NUM,
+      completed: Boolean(isComplete),
+      points: points
+    };
+    if (isComplete) payload.completed_at = new Date().toISOString();
+
     var saveRes = await fetch(url, {
       method: method,
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ student_id: studentId, lab_num: LAB_NUM, completed: true, points: LAB_PTS, completed_at: new Date().toISOString() })
+      body: JSON.stringify(payload)
     });
-    if (!saveRes.ok) throw new Error('Progress save failed (' + saveRes.status + ')');
-    // Update sessionStorage so refresh shows completed
-    var info = sessionStorage.getItem('lab_info');
-    if (info) {
-      var d = JSON.parse(info);
-      d.completed = 'true';
-      sessionStorage.setItem('lab_info', JSON.stringify(d));
+    if (!saveRes.ok) {
+      var details = await saveRes.text();
+      throw new Error('Progress save failed (' + saveRes.status + '): ' + details.slice(0, 250));
+    }
+
+    progressSaveErrorShown = false;
+
+    if (isComplete) {
+      var info = sessionStorage.getItem('lab_info');
+      if (info) {
+        var d = JSON.parse(info);
+        d.completed = 'true';
+        sessionStorage.setItem('lab_info', JSON.stringify(d));
+      }
     }
   } catch(e) {
     console.error('Could not save progress:', e);
-    document.getElementById('completeBanner').textContent = 'Lab complete locally, but progress could not be saved. Check your connection and click Run again.';
-    document.getElementById('completeBanner').style.borderColor = '#f9e2af';
-    document.getElementById('completeBanner').style.color = '#f9e2af';
-    addAiMessage('Your work is complete, but I could not save it to the portal. Check your connection, then click Run again.');
+    if (isComplete) {
+      document.getElementById('completeBanner').textContent = 'Lab complete locally, but progress could not be saved. Check your connection and click Run again.';
+      document.getElementById('completeBanner').style.borderColor = '#f9e2af';
+      document.getElementById('completeBanner').style.color = '#f9e2af';
+    }
+    if (!progressSaveErrorShown) {
+      progressSaveErrorShown = true;
+      addAiMessage('I could not save your progress to the portal. Check your connection, then click Run again.');
+    }
   }
 }
 
@@ -419,7 +504,6 @@ function completeTaskSilent(num) {
   var el=document.getElementById(tE[num]); if(el) el.className='task-item done';
   var sel=document.getElementById(sE[num]); if(sel) sel.textContent='\u2713';
   var pel=document.getElementById(pE[num]); if(pel) pel.textContent=pM[num]+'/'+pM[num]+' pts';
-  currentTask=6;
 }
 
 function completeTask(num, desc, code, output, time, pts) {
@@ -432,16 +516,16 @@ function completeTask(num, desc, code, output, time, pts) {
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
   taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
   currentTask=num+1; updateScore();
+  queueProgressSave(Number(document.getElementById('scoreDisplay').textContent), currentTask > 5);
   if (currentTask<=5) document.getElementById(tE[currentTask]).className='task-item active';
   else {
     document.getElementById('completeBanner').style.display='block';
     document.getElementById('pdfBtn').style.display='inline-block';
-    saveLabComplete();
   }
 }
 
 function updateScore() {
-  document.getElementById('scoreDisplay').textContent=taskLog.reduce(function(s,t){return s+t.pts;},0);
+  document.getElementById('scoreDisplay').textContent=savedPoints+taskLog.reduce(function(s,t){return s+t.pts;},0);
 }
 
 function generatePDF() {
