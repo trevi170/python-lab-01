@@ -34,6 +34,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .task-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #2e3440; background: #181b21; transition: all 0.3s; }
 .task-item.active { border-color: #89b4fa; background: #1a2035; }
 .task-item.done { border-color: #a6e3a1; background: #0d1f14; }
+.task-item.reviewing { box-shadow: 0 0 0 2px #cba6f7; }
 .task-item.locked { opacity: 0.45; }
 .task-status { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3d4455; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; }
 .task-item.done .task-status { border-color: #a6e3a1; background: #a6e3a1; color: #1a1d23; }
@@ -79,6 +80,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .ai-input-row button { background: #89b4fa; border: none; border-radius: 6px; padding: 6px 14px; color: #1a1d23; font-size: 12px; font-weight: 600; cursor: pointer; }
 .nav-btn { background: transparent; border: 1px solid #89b4fa; color: #89b4fa; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; }
 .nav-btn.next { background: #89b4fa; color: #1a1d23; font-weight: 600; }
+.nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .typing-indicator span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #89b4fa; margin: 0 2px; animation: bounce 1s infinite; }
 .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
@@ -180,8 +182,8 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </div>
     <div style="height:48px;"></div>
     <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
-      <button class="nav-btn" onclick="window.location.href='https://stcportal.ddns.net'">Prev</button>
-      <button class="nav-btn next" onclick="window.location.href='https://python-lab.ddns.net/lab-02/'">Next</button>
+      <button class="nav-btn" id="prevTaskBtn" onclick="showTask(-1)">&#8592; Previous Task</button>
+      <button class="nav-btn next" id="nextTaskBtn" onclick="showTask(1)">Next Task &#8594;</button>
     </div>
   </div>
 
@@ -235,6 +237,7 @@ var currentTask = 1;
 var taskLog = [];
 var labInitialized = false;
 var savedPoints = 0;
+var viewedTask = 1;
 var progressSaveQueue = Promise.resolve();
 var progressSaveErrorShown = false;
 
@@ -290,6 +293,8 @@ function initLab() {
 
   restoreEditorDraft();
   updateExpectedOutput();
+  viewedTask = currentTask > 5 ? 5 : currentTask;
+  syncTaskNavigation();
 }
 
 // The script is at the end of the page, so the interface is ready now. The
@@ -342,8 +347,10 @@ async function loadSavedProgress() {
     savedPoints = points;
     for (var i = 1; i <= doneCount; i++) completeTaskSilent(i);
     currentTask = doneCount >= 5 ? 6 : doneCount + 1;
+    viewedTask = currentTask > 5 ? 5 : currentTask;
     updateScore();
     updateExpectedOutput();
+    syncTaskNavigation();
 
     if (currentTask <= 5) {
       document.getElementById('task' + currentTask).className = 'task-item active';
@@ -446,6 +453,16 @@ function restoreEditorDraft() {
   }
 }
 
+function saveEditorDraftLocally() {
+  try {
+    localStorage.setItem(draftStorageKey(), document.getElementById('editor').value);
+    return true;
+  } catch(e) {
+    console.warn('Could not save the code draft:', e);
+    return false;
+  }
+}
+
 async function manualSave() {
   var button = document.getElementById('saveBtn');
   var originalText = '&#128190; Save';
@@ -453,11 +470,7 @@ async function manualSave() {
   button.className = 'save-btn';
   button.textContent = 'Saving...';
 
-  try {
-    localStorage.setItem(draftStorageKey(), document.getElementById('editor').value);
-  } catch(e) {
-    console.warn('Could not save the code draft:', e);
-  }
+  saveEditorDraftLocally();
 
   var points = Number(document.getElementById('scoreDisplay').textContent) || 0;
   var cloudSaved = await queueProgressSave(points, currentTask > 5);
@@ -487,6 +500,27 @@ function updateLines() {
   document.getElementById('lineNums').innerHTML = html;
 }
 
+function syncTaskNavigation() {
+  var maxTask = currentTask > 5 ? 5 : currentTask;
+  viewedTask = Math.max(1, Math.min(viewedTask, maxTask));
+  var previousButton = document.getElementById('prevTaskBtn');
+  var nextButton = document.getElementById('nextTaskBtn');
+  if (previousButton) previousButton.disabled = viewedTask <= 1;
+  if (nextButton) nextButton.disabled = viewedTask >= maxTask;
+}
+
+function showTask(direction) {
+  var maxTask = currentTask > 5 ? 5 : currentTask;
+  viewedTask = Math.max(1, Math.min(viewedTask + direction, maxTask));
+  syncTaskNavigation();
+
+  var taskElement = document.getElementById('task' + viewedTask);
+  if (!taskElement) return;
+  taskElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  taskElement.classList.add('reviewing');
+  setTimeout(function() { taskElement.classList.remove('reviewing'); }, 1200);
+}
+
 function handleTab(e) {
   if (e.key !== 'Tab') return;
   e.preventDefault();
@@ -509,6 +543,7 @@ function resetLabToScratch() {
   savedPoints = 0;
   taskLog = [];
   currentTask = 1;
+  viewedTask = 1;
   progressSaveErrorShown = false;
 
   var taskIds = ['','task1','task2','task3','task4','task5'];
@@ -540,6 +575,7 @@ function resetLabToScratch() {
   }
   resetCode();
   updateExpectedOutput();
+  syncTaskNavigation();
 }
 
 function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }
@@ -640,7 +676,10 @@ function completeTask(num, desc, code, output, time, pts) {
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
   taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
   currentTask=num+1; updateScore();
+  viewedTask=currentTask>5?5:currentTask;
   updateExpectedOutput();
+  saveEditorDraftLocally();
+  syncTaskNavigation();
   queueProgressSave(Number(document.getElementById('scoreDisplay').textContent), currentTask > 5);
   if (currentTask<=5) document.getElementById(tE[currentTask]).className='task-item active';
   else {
@@ -764,6 +803,10 @@ function addTypingIndicator(){
   chat.appendChild(div); chat.scrollTop=chat.scrollHeight; return id;
 }
 function removeTypingIndicator(id){var el=document.getElementById(id);if(el)el.remove();}
+window.addEventListener('beforeunload', saveEditorDraftLocally);
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') saveEditorDraftLocally();
+});
 updateLines();
 </script>
 </body>

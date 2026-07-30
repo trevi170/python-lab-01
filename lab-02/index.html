@@ -159,7 +159,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </div>
     <div style="height:48px;"></div>
     <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
-      <button class="nav-btn" onclick="window.location.href='https://python-lab.ddns.net/'">Prev</button>
+      <button class="nav-btn" onclick="window.location.href='https://python-lab.ddns.net/'">&#8592; Previous Lab</button>
       <button class="nav-btn next" onclick="window.location.href='https://stcportal.ddns.net'">Portal</button>
     </div>
   </div>
@@ -407,6 +407,16 @@ function restoreEditorDraft() {
   }
 }
 
+function saveEditorDraftLocally() {
+  try {
+    localStorage.setItem(draftStorageKey(), document.getElementById('editor').value);
+    return true;
+  } catch(e) {
+    console.warn('Could not save the code draft:', e);
+    return false;
+  }
+}
+
 async function manualSave() {
   var button = document.getElementById('saveBtn');
   var originalText = '&#128190; Save';
@@ -414,11 +424,7 @@ async function manualSave() {
   button.className = 'save-btn';
   button.textContent = 'Saving...';
 
-  try {
-    localStorage.setItem(draftStorageKey(), document.getElementById('editor').value);
-  } catch(e) {
-    console.warn('Could not save the code draft:', e);
-  }
+  saveEditorDraftLocally();
 
   var points = Number(document.getElementById('scoreDisplay').textContent) || 0;
   var cloudSaved = await queueProgressSave(points, currentTask > 1);
@@ -623,6 +629,7 @@ function completeTask(num, desc, code, output, time, pts) {
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
   taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
   currentTask=num+1; updateScore();
+  saveEditorDraftLocally();
   queueProgressSave(Number(document.getElementById('scoreDisplay').textContent), currentTask > 1);
   if (currentTask<=1) document.getElementById(tE[currentTask]).className='task-item active';
   else {
@@ -738,6 +745,10 @@ function addTypingIndicator(){
   chat.appendChild(div); chat.scrollTop=chat.scrollHeight; return id;
 }
 function removeTypingIndicator(id){var el=document.getElementById(id);if(el)el.remove();}
+window.addEventListener('beforeunload', saveEditorDraftLocally);
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') saveEditorDraftLocally();
+});
 updateLines();
 </script>
 </body>
