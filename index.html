@@ -44,6 +44,9 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
 .task-item.done .task-pts { color: #a6e3a1; font-weight: 700; }
 .complete-banner { display: none; background: #0d1f14; border: 1px solid #a6e3a1; border-radius: 8px; padding: 10px 14px; margin: 10px 0 4px; font-size: 13px; color: #a6e3a1; text-align: center; }
+.instruction-note { background: #1a2035; border: 1px solid #89b4fa66; border-radius: 6px; padding: 9px 11px; margin: 9px 0; color: #cdd6f4; font-size: 12px; line-height: 1.55; }
+.expected-output-box { background: #181b21; border: 1px solid #3d4455; border-radius: 6px; padding: 9px 11px; margin-bottom: 10px; }
+.expected-output-box code { display: block; background: transparent; padding: 0; color: #a6e3a1; white-space: pre-wrap; line-height: 1.5; }
 .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .editor-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .editor-header { background: #1e2230; padding: 6px 12px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #2e3440; }
@@ -146,6 +149,9 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </ul>
     <h2>Scenario</h2>
     <p>The <code>print()</code> command simply prints a line to the screen. Complete the 5 tasks below in order.</p>
+    <div class="instruction-note"><strong>Typing on another line:</strong> When a task asks for two statements, click at the end of the first statement, press <strong>Enter</strong> once, and type the second <code>print()</code> statement on the new line. Only add another line when the task specifically requests it.</div>
+    <h2>Expected output or result</h2>
+    <div class="expected-output-box"><code id="expectedOutput">Hello, Python!</code></div>
     <div class="complete-banner" id="completeBanner">&#127881; Lab complete! 14 / 14 points — Download your report above.</div>
     <h2 style="margin-top:14px;">Tasks</h2>
     <div class="task-item active" id="task1">
@@ -170,7 +176,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </div>
     <div class="task-item locked" id="task5">
       <div class="task-status" id="t5s"></div>
-      <div class="task-label"><strong>Task 5</strong> — Write two <code>print()</code> statements on separate lines using single quotes in at least one</div>
+      <div class="task-label"><strong>Task 5</strong> — Type one <code>print()</code> statement, press <strong>Enter</strong>, then type a second <code>print()</code> statement on the next line; use single quotes in at least one</div>
       <div class="task-pts" id="t5p">4 pts</div>
     </div>
     <div style="height:48px;"></div>
@@ -284,6 +290,7 @@ function initLab() {
   }
 
   restoreEditorDraft();
+  updateExpectedOutput();
 }
 
 // The script is at the end of the page, so the interface is ready now. The
@@ -298,6 +305,18 @@ function completedTaskCountForPoints(points) {
   if (points >= 6) return 2;
   if (points >= 3) return 1;
   return 0;
+}
+
+function updateExpectedOutput() {
+  var expected = {
+    1: 'Hello, Python!',
+    2: student.firstName || 'Your first name',
+    3: "NameError: name '" + (student.firstName || 'name') + "' is not defined",
+    4: "SyntaxError: Missing parentheses in call to 'print'",
+    5: 'First print() output\nSecond print() output'
+  };
+  document.getElementById('expectedOutput').textContent =
+    currentTask > 5 ? 'Lab complete — 14 / 14 points' : expected[currentTask];
 }
 
 async function loadSavedProgress() {
@@ -325,6 +344,7 @@ async function loadSavedProgress() {
     for (var i = 1; i <= doneCount; i++) completeTaskSilent(i);
     currentTask = doneCount >= 5 ? 6 : doneCount + 1;
     updateScore();
+    updateExpectedOutput();
 
     if (currentTask <= 5) {
       document.getElementById('task' + currentTask).className = 'task-item active';
@@ -520,6 +540,7 @@ function resetLabToScratch() {
     } catch(e) { console.warn('Could not reset the saved lab session:', e); }
   }
   resetCode();
+  updateExpectedOutput();
 }
 
 function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }
@@ -620,6 +641,7 @@ function completeTask(num, desc, code, output, time, pts) {
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
   taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
   currentTask=num+1; updateScore();
+  updateExpectedOutput();
   queueProgressSave(Number(document.getElementById('scoreDisplay').textContent), currentTask > 5);
   if (currentTask<=5) document.getElementById(tE[currentTask]).className='task-item active';
   else {
