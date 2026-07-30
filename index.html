@@ -149,40 +149,39 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </ul>
     <h2>Scenario</h2>
     <p>The <code>print()</code> command simply prints a line to the screen. Complete the 5 tasks below in order.</p>
-    <div class="instruction-note"><strong>Typing on another line:</strong> When a task asks for two statements, click at the end of the first statement, press <strong>Enter</strong> once, and type the second <code>print()</code> statement on the new line. Only add another line when the task specifically requests it.</div>
     <h2>Expected output or result</h2>
     <div class="expected-output-box"><code id="expectedOutput">Hello, Python!</code></div>
     <div class="complete-banner" id="completeBanner">&#127881; Lab complete! 14 / 14 points — Download your report above.</div>
     <h2 style="margin-top:14px;">Tasks</h2>
     <div class="task-item active" id="task1">
       <div class="task-status" id="t1s"></div>
-      <div class="task-label"><strong>Task 1</strong> — Print <code>Hello, Python!</code> using <code>print()</code> with double quotes</div>
+      <div class="task-label"><strong>Task 1</strong> — On the first available code line, print <code>Hello, Python!</code> using <code>print()</code> with double quotes</div>
       <div class="task-pts" id="t1p">3 pts</div>
     </div>
     <div class="task-item locked" id="task2">
       <div class="task-status" id="t2s"></div>
-      <div class="task-label"><strong>Task 2</strong> — Use <code>print()</code> to display your first name</div>
+      <div class="task-label"><strong>Task 2</strong> — Press <strong>Enter</strong> after the Task 1 statement, then on the <strong>next line</strong> use <code>print()</code> to display your first name</div>
       <div class="task-pts" id="t2p">3 pts</div>
     </div>
     <div class="task-item locked" id="task3">
       <div class="task-status" id="t3s"></div>
-      <div class="task-label"><strong>Task 3</strong> — Cause a <code>NameError</code> by removing quotes from inside <code>print()</code></div>
+      <div class="task-label"><strong>Task 3</strong> — On the existing first-name line, remove the quotes from inside <code>print()</code> to cause a <code>NameError</code>; <strong>do not add another line</strong></div>
       <div class="task-pts" id="t3p">2 pts</div>
     </div>
     <div class="task-item locked" id="task4">
       <div class="task-status" id="t4s"></div>
-      <div class="task-label"><strong>Task 4</strong> — Cause a <code>SyntaxError</code> by removing parentheses from <code>print</code></div>
+      <div class="task-label"><strong>Task 4</strong> — On the current line, type <code>print "Hello"</code> without parentheses to cause a <code>SyntaxError</code>; <strong>do not add another line</strong></div>
       <div class="task-pts" id="t4p">2 pts</div>
     </div>
     <div class="task-item locked" id="task5">
       <div class="task-status" id="t5s"></div>
-      <div class="task-label"><strong>Task 5</strong> — Type one <code>print()</code> statement, press <strong>Enter</strong>, then type a second <code>print()</code> statement on the next line; use single quotes in at least one</div>
+      <div class="task-label"><strong>Task 5</strong> — Replace the current code with two lines: type one <code>print()</code> statement, press <strong>Enter</strong>, then type the second <code>print()</code> statement on the <strong>next line</strong>; use single quotes in at least one</div>
       <div class="task-pts" id="t5p">4 pts</div>
     </div>
     <div style="height:48px;"></div>
     <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
-      <button class="nav-btn">Prev</button>
-      <button class="nav-btn next">Next</button>
+      <button class="nav-btn" onclick="window.location.href='https://stcportal.ddns.net'">Prev</button>
+      <button class="nav-btn next" onclick="window.location.href='https://python-lab.ddns.net/lab-02/'">Next</button>
     </div>
   </div>
 
@@ -310,7 +309,7 @@ function completedTaskCountForPoints(points) {
 function updateExpectedOutput() {
   var expected = {
     1: 'Hello, Python!',
-    2: student.firstName || 'Your first name',
+    2: 'Hello, Python!\n' + (student.firstName || 'Your first name'),
     3: "NameError: name '" + (student.firstName || 'name') + "' is not defined",
     4: "SyntaxError: Missing parentheses in call to 'print'",
     5: 'First print() output\nSecond print() output'
@@ -585,13 +584,13 @@ function runCode() {
 function gradeError(code, error, now) {
   if (currentTask === 3 && error.type === 'NameError') {
     completeTask(3,'Triggered a NameError by removing quotes',code,error.msg,now,2);
-    addAiMessage('Task 3 done! NameError means Python saw a word without quotes. Now try Task 4 — remove the parentheses from print and run it.');
+    addAiMessage('Task 3 done! For Task 4, stay on the current line and type print "Hello" without parentheses. Do not add another line.');
   } else if (currentTask === 4 && error.type === 'SyntaxError' && error.msg.indexOf('parentheses') !== -1) {
     completeTask(4,'Triggered a SyntaxError by removing parentheses',code,error.msg,now,2);
-    addAiMessage('Task 4 done! Now for Task 5 — write two print() statements on separate lines and use single quotes in at least one.');
+    addAiMessage('Task 4 done! For Task 5, replace the current code with two print() statements: type the first, press Enter, and type the second on the next line.');
   } else {
     if (currentTask === 3) addAiMessage('For Task 3, cause a NameError. Try: print('+( student.firstName||'hello')+') without quotes.');
-    else if (currentTask === 4) addAiMessage('For Task 4, cause a SyntaxError. Try: print "Hello" without parentheses.');
+    else if (currentTask === 4) addAiMessage('For Task 4, use the current line and type: print "Hello" without parentheses. Do not add another line.');
   }
 }
 
@@ -600,13 +599,13 @@ function gradeSuccess(code, results, now) {
   if (currentTask === 1) {
     var hasOutput = results.some(function(r){return r==='Hello, Python!';});
     var hasDouble = codeLines.some(function(l){return /print\s*\(\s*"Hello,\s*Python!"\s*\)/.test(l);});
-    if (hasOutput && hasDouble) { completeTask(1,'Printed Hello, Python! with double quotes',code,results.join('\n'),now,3); addAiMessage('Task 1 done! Now for Task 2 — use print() to display your first name ('+student.firstName+').'); }
+    if (hasOutput && hasDouble) { completeTask(1,'Printed Hello, Python! with double quotes',code,results.join('\n'),now,3); addAiMessage('Task 1 done! For Task 2, press Enter and on the next line use print() to display your first name ('+student.firstName+').'); }
     else if (hasOutput) addAiMessage('Almost! Task 1 needs double quotes: print("Hello, Python!")');
     else addAiMessage('Not quite. Type exactly: print("Hello, Python!") — capital P and exclamation mark!');
   } else if (currentTask === 2) {
     var fn = student.firstName.toLowerCase();
     var hasName = results.some(function(r){return r.toLowerCase().indexOf(fn)!==-1;});
-    if (hasName) { completeTask(2,'Printed their name ('+student.firstName+')',code,results.join('\n'),now,3); addAiMessage('Task 2 done! Now for Task 3 — write print('+student.firstName+') WITHOUT quotes and run it.'); }
+    if (hasName) { completeTask(2,'Printed their name ('+student.firstName+')',code,results.join('\n'),now,3); addAiMessage('Task 2 done! For Task 3, edit the first-name line and remove its quotes. Do not add another line.'); }
     else addAiMessage('I do not see your name yet. Try: print("'+student.firstName+'") and click Run.');
   } else if (currentTask === 3) {
     addAiMessage('For Task 3 you need to cause an error. Remove the quotes — type print('+student.firstName+') without quotes, then Run.');
@@ -705,11 +704,11 @@ function fileSafe(value) {
 }
 
 var taskGuidance = {
-  1: 'Task 1 is still active. Print Hello, Python! using double quotes, then click Run.',
-  2: 'Task 2 is still active. Use print() to display your first name ('+student.firstName+'), then click Run. Task 3 will stay locked until this is complete.',
-  3: 'Task 3 is active. Remove the quotes around your first name inside print() so Python produces a NameError.',
-  4: 'Task 4 is active. Remove the parentheses from a print statement so Python produces the requested SyntaxError.',
-  5: 'Task 5 is active. Write two print() statements on separate lines and use single quotes in at least one.'
+  1: 'Task 1 is active. On the first available code line, print Hello, Python! using double quotes, then click Run.',
+  2: 'Task 2 is active. Press Enter after the Task 1 statement and on the next line use print() to display your first name ('+student.firstName+').',
+  3: 'Task 3 is active. Edit the existing first-name line and remove its quotes so Python produces a NameError. Do not add another line.',
+  4: 'Task 4 is active. On the current line, type print \"Hello\" without parentheses so Python produces the requested SyntaxError. Do not add another line.',
+  5: 'Task 5 is active. Replace the current code with two print() statements: type the first, press Enter, and type the second on the next line. Use single quotes in at least one.'
 };
 
 function getTaskGuidance() {
