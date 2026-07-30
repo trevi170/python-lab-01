@@ -18,6 +18,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1d23; color: #
 .toolbar button { background: none; border: none; color: #6c7086; cursor: pointer; padding: 5px 8px; border-radius: 4px; font-size: 13px; }
 .toolbar button:hover { background: #2e3440; color: #cdd6f4; }
 .run-btn { background: #89b4fa !important; color: #1a1d23 !important; font-weight: 600 !important; }
+.save-btn { border: 1px solid #a6e3a1 !important; color: #a6e3a1 !important; font-weight: 600 !important; min-width: 70px; }
+.save-btn.saved { background: #a6e3a1 !important; color: #1a1d23 !important; }
+.save-btn.failed { border-color: #f38ba8 !important; color: #f38ba8 !important; }
 .sep { width: 1px; height: 20px; background: #2e3440; margin: 0 4px; }
 .score-display { margin-left: auto; font-size: 12px; color: #a6adc8; display: flex; align-items: center; gap: 6px; }
 .score-num { font-weight: 700; color: #a6e3a1; font-size: 14px; }
@@ -125,6 +128,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
   <div class="sep"></div>
   <button onclick="copyEditor()">Copy</button>
   <button onclick="resetCode()">Reset</button>
+  <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save task progress and this code draft">&#128190; Save</button>
   <div class="score-display">Score: <span class="score-num" id="scoreDisplay">0</span> / 14</div>
   <div style="margin-left:12px;">
     <button class="pdf-btn" id="pdfBtn" onclick="generatePDF()">Download Report</button>
@@ -278,6 +282,8 @@ function initLab() {
   } else {
     document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 — type print("Hello, Python!") and click Run.';
   }
+
+  restoreEditorDraft();
 }
 
 // The script is at the end of the page, so the interface is ready now. The
@@ -335,11 +341,12 @@ function queueProgressSave(points, isComplete) {
   progressSaveQueue = progressSaveQueue.then(function() {
     return saveLabProgress(points, isComplete);
   });
+  return progressSaveQueue;
 }
 
 async function saveLabProgress(points, isComplete) {
   var studentId = sessionStorage.getItem('lab_student_id');
-  if (!studentId) return;
+  if (!studentId) return false;
   try {
     var filter = '?student_id=eq.' + encodeURIComponent(studentId) + '&lab_num=eq.' + LAB_NUM;
     var checkRes = await fetch(SUPABASE_URL + '/rest/v1/lab_progress' + filter, {
@@ -350,7 +357,7 @@ async function saveLabProgress(points, isComplete) {
 
     // Never replace saved progress with an earlier attempt.
     if (!isComplete && existing && existing[0] &&
-        (existing[0].completed || Number(existing[0].points || 0) > points)) return;
+        (existing[0].completed || Number(existing[0].points || 0) > points)) return true;
 
     var method = (existing && existing.length > 0) ? 'PATCH' : 'POST';
     var url = SUPABASE_URL + '/rest/v1/lab_progress' + (method === 'PATCH' ? filter : '');
@@ -382,6 +389,7 @@ async function saveLabProgress(points, isComplete) {
         sessionStorage.setItem('lab_info', JSON.stringify(d));
       }
     }
+    return true;
   } catch(e) {
     console.error('Could not save progress:', e);
     if (isComplete) {
@@ -393,7 +401,59 @@ async function saveLabProgress(points, isComplete) {
       progressSaveErrorShown = true;
       addAiMessage('I could not save your progress to the portal. Check your connection, then click Run again.');
     }
+    return false;
   }
+}
+
+function draftStorageKey() {
+  var studentId = sessionStorage.getItem('lab_student_id') || 'guest';
+  return 'python_lab_draft_' + studentId + '_' + LAB_NUM;
+}
+
+function restoreEditorDraft() {
+  try {
+    var draft = localStorage.getItem(draftStorageKey());
+    if (draft !== null) {
+      document.getElementById('editor').value = draft;
+      updateLines();
+    }
+  } catch(e) {
+    console.warn('Could not restore the code draft:', e);
+  }
+}
+
+async function manualSave() {
+  var button = document.getElementById('saveBtn');
+  var originalText = '&#128190; Save';
+  button.disabled = true;
+  button.className = 'save-btn';
+  button.textContent = 'Saving...';
+
+  try {
+    localStorage.setItem(draftStorageKey(), document.getElementById('editor').value);
+  } catch(e) {
+    console.warn('Could not save the code draft:', e);
+  }
+
+  var points = Number(document.getElementById('scoreDisplay').textContent) || 0;
+  var cloudSaved = await queueProgressSave(points, currentTask > 5);
+  button.disabled = false;
+
+  if (cloudSaved) {
+    button.className = 'save-btn saved';
+    button.textContent = '\u2713 Saved';
+  } else if (!sessionStorage.getItem('lab_student_id')) {
+    button.className = 'save-btn saved';
+    button.textContent = '\u2713 Draft saved';
+  } else {
+    button.className = 'save-btn failed';
+    button.textContent = 'Save failed';
+  }
+
+  setTimeout(function() {
+    button.className = 'save-btn';
+    button.innerHTML = originalText;
+  }, 2500);
 }
 
 function updateLines() {
