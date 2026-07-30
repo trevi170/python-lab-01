@@ -853,17 +853,12 @@ function getTaskSolution(taskNum) {
 }
 
 function getSolutionUnlockedMessage(taskNum) {
-  return 'You have made 5 unsuccessful Run attempts on Task ' + taskNum +
+  return 'It looks like you are still stuck on Task ' + taskNum +
     '. Here is the exact solution:\n' + getTaskSolution(taskNum);
 }
 
 function getSolutionWaitingMessage(taskNum) {
-  var attempts = getFailedAttempts(taskNum);
-  var remaining = Math.max(0, 5 - attempts);
-  return 'I will keep helping without giving the full answer yet. You have ' +
-    attempts + ' of 5 unsuccessful Run attempts on Task ' + taskNum + '. ' +
-    (remaining ? 'Try the hint below; the exact solution unlocks after ' + remaining +
-      ' more unsuccessful attempt' + (remaining === 1 ? '' : 's') + '.\n' : '') +
+  return 'Let\u2019s work through Task ' + taskNum + ' with another hint:\n' +
     taskHints[taskNum];
 }
 
@@ -907,7 +902,7 @@ async function sendMessage() {
     var currentCode = document.getElementById('editor').value;
     var complete = currentTask > 5;
     var activeTask = complete ? null : currentTask;
-    var failedAttempts = complete ? 0 : getFailedAttempts(activeTask);
+    var solutionUnlocked = !complete && getFailedAttempts(activeTask) >= 5;
     var activeGuidance = getTaskGuidance();
     var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
       'Content-Type':'application/json',
@@ -915,9 +910,9 @@ async function sendMessage() {
       'Authorization':'Bearer '+SUPABASE_KEY
     },
       body:JSON.stringify({
-        system:'You are a friendly Python tutor for beginners. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. The student has '+failedAttempts+' unsuccessful Run attempts on the active task. Do not provide the full solution before 5 unsuccessful attempts; give a useful hint instead. If the lab is complete, never say a task is active.',
-        context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),labComplete:complete,failedAttempts:failedAttempts,solutionUnlockAttempts:5,solutionUnlocked:failedAttempts>=5,taskInstructions:activeGuidance,code:currentCode},
-        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to a task as active.':'The active task is Task '+activeTask+'. Do not advance me to another task or reveal its full solution before 5 unsuccessful Run attempts.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
+        system:'You are a friendly Python tutor for beginners. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. The application says the full solution is currently '+(solutionUnlocked?'available':'not available')+'. When it is not available, give a useful hint instead. Never mention attempt counts, thresholds, unlock rules, or promise that a solution will be provided later. If the lab is complete, never say a task is active.',
+        context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),labComplete:complete,solutionUnlocked:solutionUnlocked,taskInstructions:activeGuidance,code:currentCode},
+        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to a task as active.':'The active task is Task '+activeTask+'. Do not advance me to another task. Follow the application solution-availability state and never discuss its policy.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
       })});
     if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
     var data=await res.json(); removeTypingIndicator(tid);

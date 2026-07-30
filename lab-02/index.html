@@ -744,7 +744,7 @@ function fileSafe(value) {
 }
 
 var taskGuidance = {
-  1: 'Task 1 is active. Modify only the first print() call. Use sep to place three asterisks between the words and end to place three dots immediately before the unchanged print("Python") call on the same output line. Never put \\n in the end value. Do not provide the full finished code before 5 unsuccessful Run attempts.'
+  1: 'Task 1 is active. Modify only the first print() call. Use sep to place three asterisks between the words and end to place three dots immediately before the unchanged print("Python") call on the same output line. Never put \\n in the end value.'
 };
 
 function isLabComplete() {
@@ -780,17 +780,12 @@ function getExactSolution() {
 }
 
 function getSolutionUnlockedMessage() {
-  return 'You have made 5 unsuccessful Run attempts on Task 1. Here is the exact solution:\n' +
+  return 'It looks like you are still stuck on Task 1. Here is the exact solution:\n' +
     getExactSolution();
 }
 
 function getSolutionWaitingMessage() {
-  var attempts = getFailedAttempts(1);
-  var remaining = Math.max(0, 5 - attempts);
-  return 'I will keep helping without giving the full answer yet. You have ' +
-    attempts + ' of 5 unsuccessful Run attempts on Task 1. ' +
-    (remaining ? 'Try the hint below; the exact solution unlocks after ' + remaining +
-      ' more unsuccessful attempt' + (remaining === 1 ? '' : 's') + '.\n' : '') +
+  return 'Let\u2019s work through Task 1 with another hint:\n' +
     'Hint: sep controls what appears between the three words, and end controls what appears immediately before the unchanged second print() output. Carefully count the asterisks and dots in the expected output.';
 }
 
@@ -831,7 +826,7 @@ async function sendMessage() {
     var currentCode = document.getElementById('editor').value;
     var complete = isLabComplete();
     var activeTask = complete ? null : 1;
-    var failedAttempts = complete ? 0 : getFailedAttempts(1);
+    var solutionUnlocked = !complete && getFailedAttempts(1) >= 5;
     var activeGuidance = getTaskGuidance();
     var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
       'Content-Type':'application/json',
@@ -839,9 +834,9 @@ async function sendMessage() {
       'Authorization':'Bearer '+SUPABASE_KEY
     },
       body:JSON.stringify({
-        system:'You are a friendly Python tutor for beginners working on sep and end in print(). Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' The only correct final output is Programming***Essentials***in...Python on one line. The correct end value is exactly "..."; never recommend a newline or \\\\n in end. The second line must remain exactly print("Python"). The student has '+failedAttempts+' unsuccessful Run attempts. Do not provide the full solution before 5 unsuccessful attempts; give a useful hint instead. If the lab state says complete, never say a task is active or that more work remains.',
-        context:{activeTask:activeTask,completedTasks:complete?1:0,labComplete:complete,failedAttempts:failedAttempts,solutionUnlockAttempts:5,solutionUnlocked:failedAttempts>=5,expectedOutput:'Programming***Essentials***in...Python',requiredEnd:'...',forbiddenEnd:'...\\\\n',taskInstructions:activeGuidance,code:currentCode},
-        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to Task 1 as active.':'The active task is Task 1. Do not advance me to another task or reveal the full solution before 5 unsuccessful Run attempts.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
+        system:'You are a friendly Python tutor for beginners working on sep and end in print(). Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' The only correct final output is Programming***Essentials***in...Python on one line. The correct end value is exactly "..."; never recommend a newline or \\\\n in end. The second line must remain exactly print("Python"). The application says the full solution is currently '+(solutionUnlocked?'available':'not available')+'. When it is not available, give a useful hint instead. Never mention attempt counts, thresholds, unlock rules, or promise that a solution will be provided later. If the lab state says complete, never say a task is active or that more work remains.',
+        context:{activeTask:activeTask,completedTasks:complete?1:0,labComplete:complete,solutionUnlocked:solutionUnlocked,expectedOutput:'Programming***Essentials***in...Python',requiredEnd:'...',forbiddenEnd:'...\\\\n',taskInstructions:activeGuidance,code:currentCode},
+        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to Task 1 as active.':'The active task is Task 1. Do not advance me to another task. Follow the application solution-availability state and never discuss its policy.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
       })});
     if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
     var data=await res.json(); removeTypingIndicator(tid);
