@@ -39,6 +39,8 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .task-item.done .task-status { border-color: #a6e3a1; background: #a6e3a1; color: #1a1d23; }
 .task-item.active .task-status { border-color: #89b4fa; }
 .task-label { font-size: 12px; color: #6c7086; line-height: 1.5; flex: 1; }
+.task-summary { font-weight: 600; margin-bottom: 3px; }
+.task-instruction strong { font-weight: 600; }
 .task-item.active .task-label { color: #cdd6f4; }
 .task-item.done .task-label { color: #a6e3a1; }
 .task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
@@ -154,7 +156,10 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     <h2 style="margin-top:14px;">Tasks</h2>
     <div class="task-item active" id="task1">
       <div class="task-status" id="t1s"></div>
-      <div class="task-label"><strong>Task 1</strong> — Use <code>sep="***"</code> and <code>end="..."</code> in the first call so both calls produce the exact expected output</div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 1</strong> — Format the output using <code>sep</code> and <code>end</code></div>
+        <div class="task-instruction"><strong>What to do:</strong> Use <code>sep="***"</code> and <code>end="..."</code> in the first call so both calls produce the exact expected output. Keep the second line exactly as <code>print("Python")</code>.</div>
+      </div>
       <div class="task-pts" id="t1p">13.5 pts</div>
     </div>
     <div style="height:48px;"></div>

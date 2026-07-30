@@ -40,6 +40,8 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .task-item.done .task-status { border-color: #a6e3a1; background: #a6e3a1; color: #1a1d23; }
 .task-item.active .task-status { border-color: #89b4fa; }
 .task-label { font-size: 12px; color: #6c7086; line-height: 1.5; flex: 1; }
+.task-summary { font-weight: 600; margin-bottom: 3px; }
+.task-instruction strong { font-weight: 600; }
 .task-item.active .task-label { color: #cdd6f4; }
 .task-item.done .task-label { color: #a6e3a1; }
 .task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
@@ -157,27 +159,42 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     <h2 style="margin-top:14px;">Tasks</h2>
     <div class="task-item active" id="task1">
       <div class="task-status" id="t1s"></div>
-      <div class="task-label"><strong>Task 1</strong> — On the first available code line, print <code>Hello, Python!</code> using <code>print()</code> with double quotes</div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 1</strong> — Print <code>Hello, Python!</code> with double quotes</div>
+        <div class="task-instruction"><strong>What to do:</strong> On the first available code line, print <code>Hello, Python!</code> using <code>print()</code> with double quotes.</div>
+      </div>
       <div class="task-pts" id="t1p">3 pts</div>
     </div>
     <div class="task-item locked" id="task2">
       <div class="task-status" id="t2s"></div>
-      <div class="task-label"><strong>Task 2</strong> — Press <strong>Enter</strong> after the Task 1 statement, then on the <strong>next line</strong> use <code>print()</code> to display your first name</div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 2</strong> — Print your first name</div>
+        <div class="task-instruction"><strong>What to do:</strong> Press <strong>Enter</strong> after the Task 1 statement, then on the <strong>next line</strong> use <code>print()</code> to display your first name.</div>
+      </div>
       <div class="task-pts" id="t2p">3 pts</div>
     </div>
     <div class="task-item locked" id="task3">
       <div class="task-status" id="t3s"></div>
-      <div class="task-label"><strong>Task 3</strong> — On the existing first-name line, remove the quotes from inside <code>print()</code> to cause a <code>NameError</code>; <strong>do not add another line</strong></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 3</strong> — Trigger a <code>NameError</code> by removing quotes</div>
+        <div class="task-instruction"><strong>What to do:</strong> On the existing first-name line, remove the quotes from inside <code>print()</code> to cause a <code>NameError</code>; <strong>do not add another line</strong>.</div>
+      </div>
       <div class="task-pts" id="t3p">2 pts</div>
     </div>
     <div class="task-item locked" id="task4">
       <div class="task-status" id="t4s"></div>
-      <div class="task-label"><strong>Task 4</strong> — On the current line, type <code>print "Hello"</code> without parentheses to cause a <code>SyntaxError</code>; <strong>do not add another line</strong></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 4</strong> — Trigger a <code>SyntaxError</code> by removing parentheses</div>
+        <div class="task-instruction"><strong>What to do:</strong> On the current line, type <code>print "Hello"</code> without parentheses to cause a <code>SyntaxError</code>; <strong>do not add another line</strong>.</div>
+      </div>
       <div class="task-pts" id="t4p">2 pts</div>
     </div>
     <div class="task-item locked" id="task5">
       <div class="task-status" id="t5s"></div>
-      <div class="task-label"><strong>Task 5</strong> — Replace the current code with two lines: type one <code>print()</code> statement, press <strong>Enter</strong>, then type the second <code>print()</code> statement on the <strong>next line</strong>; use single quotes in at least one</div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 5</strong> — Use single quotes and two <code>print()</code> statements</div>
+        <div class="task-instruction"><strong>What to do:</strong> Replace the current code with two lines: type one <code>print()</code> statement, press <strong>Enter</strong>, then type the second <code>print()</code> statement on the <strong>next line</strong>; use single quotes in at least one.</div>
+      </div>
       <div class="task-pts" id="t5p">4 pts</div>
     </div>
     <div style="height:48px;"></div>
