@@ -523,7 +523,11 @@ async function sendMessage() {
     var currentCode = document.getElementById('editor').value;
     var activeTask = Math.min(currentTask,5);
     var activeGuidance = getTaskGuidance();
-    var res=await fetch('/.netlify/functions/tutor',{method:'POST',headers:{'Content-Type':'application/json'},
+    var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPABASE_KEY,
+      'Authorization':'Bearer '+SUPABASE_KEY
+    },
       body:JSON.stringify({
         system:'You are a friendly Python tutor for beginners. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. ACTIVE TASK: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. Never give a full solution.',
         context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),taskInstructions:activeGuidance,code:currentCode},
@@ -532,7 +536,7 @@ async function sendMessage() {
     if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
     var data=await res.json(); removeTypingIndicator(tid);
     addAiMessage(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!");
-  } catch(e) { removeTypingIndicator(tid); addAiMessage("Connection issue — the AI tutor needs Netlify to work. The lab grading still works!"); }
+  } catch(e) { removeTypingIndicator(tid); addAiMessage("Connection issue — the AI tutor is temporarily unavailable. The lab grading still works!"); }
 }
 
 function askChip(q){document.getElementById('aiInput').value=q;sendMessage();}
