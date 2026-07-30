@@ -219,6 +219,7 @@ var currentTask = 1;
 var taskLog = [];
 var labInitialized = false;
 var savedPoints = 0;
+var failedAttemptsByTask = {};
 var progressSaveQueue = Promise.resolve();
 var progressSaveErrorShown = false;
 
@@ -273,6 +274,7 @@ function initLab() {
   }
 
   restoreEditorDraft();
+  loadTutorAttempts();
   updateLines();
 }
 
@@ -400,6 +402,47 @@ function draftStorageKey() {
   return 'python_lab_draft_' + studentId + '_' + LAB_NUM;
 }
 
+function tutorAttemptStorageKey() {
+  var studentId = sessionStorage.getItem('lab_student_id') || 'guest';
+  return 'python_lab_tutor_attempts_' + studentId + '_' + LAB_NUM;
+}
+
+function loadTutorAttempts() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(tutorAttemptStorageKey()) || '{}');
+    failedAttemptsByTask = saved && typeof saved === 'object' ? saved : {};
+  } catch(e) {
+    failedAttemptsByTask = {};
+    console.warn('Could not restore tutor attempts:', e);
+  }
+}
+
+function saveTutorAttempts() {
+  try { localStorage.setItem(tutorAttemptStorageKey(), JSON.stringify(failedAttemptsByTask)); }
+  catch(e) { console.warn('Could not save tutor attempts:', e); }
+}
+
+function getFailedAttempts(taskNum) {
+  return Math.max(0, Number(failedAttemptsByTask[taskNum]) || 0);
+}
+
+function recordFailedAttempt(taskNum) {
+  failedAttemptsByTask[taskNum] = getFailedAttempts(taskNum) + 1;
+  saveTutorAttempts();
+  return failedAttemptsByTask[taskNum];
+}
+
+function clearTutorAttempts(taskNum) {
+  delete failedAttemptsByTask[taskNum];
+  saveTutorAttempts();
+}
+
+function resetTutorAttempts() {
+  failedAttemptsByTask = {};
+  try { localStorage.removeItem(tutorAttemptStorageKey()); }
+  catch(e) { console.warn('Could not clear tutor attempts:', e); }
+}
+
 function restoreEditorDraft() {
   try {
     var draft = localStorage.getItem(draftStorageKey());
@@ -477,6 +520,7 @@ function resetCode() {
 function resetLabToScratch() {
   try { localStorage.removeItem(draftStorageKey()); }
   catch(e) { console.warn('Could not clear the saved code draft:', e); }
+  resetTutorAttempts();
 
   savedPoints = 0;
   taskLog = [];
@@ -578,6 +622,7 @@ function runCode() {
   var sim = simulatePython(code);
   var out = document.getElementById('consoleOutput');
   var now = new Date().toLocaleTimeString();
+  var taskBeforeRun = currentTask;
   if (sim.error) {
     out.innerHTML = '<span class="err">Traceback (most recent call last):\n  File "main.py"\n'+escHtml(sim.error.msg)+'</span>';
     addAiMessage('Check the print() syntax and make sure all text and the sep/end values are inside quotes.');
@@ -585,6 +630,10 @@ function runCode() {
     var visibleOutput = sim.text.replace(/\n$/, '');
     out.innerHTML = visibleOutput ? '<span class="ok">'+escHtml(visibleOutput)+'</span>' : '<span class="sys">(no output)</span>';
     gradeSuccess(code, sim, now);
+  }
+  if (currentTask === taskBeforeRun && taskBeforeRun === 1) {
+    var attempts = recordFailedAttempt(taskBeforeRun);
+    if (attempts === 5) addAiMessage(getSolutionUnlockedMessage());
   }
 }
 
@@ -632,6 +681,7 @@ function completeTask(num, desc, code, output, time, pts) {
   document.getElementById(tE[num]).className='task-item done';
   document.getElementById(sE[num]).textContent='\u2713';
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
+  clearTutorAttempts(num);
   taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
   currentTask=num+1; updateScore();
   saveEditorDraftLocally();
@@ -694,7 +744,7 @@ function fileSafe(value) {
 }
 
 var taskGuidance = {
-  1: 'Task 1 is active. Modify only the first print() call. Use sep to place three asterisks between the words and end="..." to place three dots immediately before the unchanged print("Python") call on the same output line. Never put \\n in the end value. Do not provide the full finished code unless the student explicitly asks for the solution.'
+  1: 'Task 1 is active. Modify only the first print() call. Use sep to place three asterisks between the words and end to place three dots immediately before the unchanged print("Python") call on the same output line. Never put \\n in the end value. Do not provide the full finished code before 5 unsuccessful Run attempts.'
 };
 
 function isLabComplete() {
@@ -729,10 +779,32 @@ function getExactSolution() {
     'Keep end="..." exactly as shown. Do not add \\n because Python must stay on the same output line.';
 }
 
+function getSolutionUnlockedMessage() {
+  return 'You have made 5 unsuccessful Run attempts on Task 1. Here is the exact solution:\n' +
+    getExactSolution();
+}
+
+function getSolutionWaitingMessage() {
+  var attempts = getFailedAttempts(1);
+  var remaining = Math.max(0, 5 - attempts);
+  return 'I will keep helping without giving the full answer yet. You have ' +
+    attempts + ' of 5 unsuccessful Run attempts on Task 1. ' +
+    (remaining ? 'Try the hint below; the exact solution unlocks after ' + remaining +
+      ' more unsuccessful attempt' + (remaining === 1 ? '' : 's') + '.\n' : '') +
+    'Hint: sep controls what appears between the three words, and end controls what appears immediately before the unchanged second print() output. Carefully count the asterisks and dots in the expected output.';
+}
+
 function validateTutorReply(reply) {
   var text = String(reply || '');
   if (/end\s*=\s*(['"])[^'"]*\\n[^'"]*\1/i.test(text)) {
-    return getExactSolution();
+    return isLabComplete() || getFailedAttempts(1) >= 5
+      ? getExactSolution()
+      : getSolutionWaitingMessage();
+  }
+  if (!isLabComplete() && getFailedAttempts(1) < 5 &&
+      text.indexOf('sep="***"') !== -1 && text.indexOf('end="..."') !== -1 &&
+      text.indexOf('print("Python")') !== -1) {
+    return getSolutionWaitingMessage();
   }
   if (isLabComplete() && /\bTask\s*1\s+(is|remains|is still)\s+active\b/i.test(text)) {
     return getTaskGuidance();
@@ -749,7 +821,9 @@ async function sendMessage() {
     return;
   }
   if (isSolutionRequest(text)) {
-    addAiMessage(isLabComplete() ? getTaskGuidance() + '\n\n' + getExactSolution() : getExactSolution());
+    if (isLabComplete()) addAiMessage(getTaskGuidance() + '\n\n' + getExactSolution());
+    else if (getFailedAttempts(1) >= 5) addAiMessage(getSolutionUnlockedMessage());
+    else addAiMessage(getSolutionWaitingMessage());
     return;
   }
   var tid=addTypingIndicator();
@@ -757,6 +831,7 @@ async function sendMessage() {
     var currentCode = document.getElementById('editor').value;
     var complete = isLabComplete();
     var activeTask = complete ? null : 1;
+    var failedAttempts = complete ? 0 : getFailedAttempts(1);
     var activeGuidance = getTaskGuidance();
     var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
       'Content-Type':'application/json',
@@ -764,9 +839,9 @@ async function sendMessage() {
       'Authorization':'Bearer '+SUPABASE_KEY
     },
       body:JSON.stringify({
-        system:'You are a friendly Python tutor for beginners working on sep and end in print(). Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' The only correct final output is Programming***Essentials***in...Python on one line. The correct end value is exactly "..."; never recommend a newline or \\\\n in end. The second line must remain exactly print("Python"). If the lab state says complete, never say a task is active or that more work remains. Guide with small hints before revealing code.',
-        context:{activeTask:activeTask,completedTasks:complete?1:0,labComplete:complete,expectedOutput:'Programming***Essentials***in...Python',requiredEnd:'...',forbiddenEnd:'...\\\\n',taskInstructions:activeGuidance,code:currentCode},
-        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to Task 1 as active.':'The active task is Task 1. Do not advance me to another task.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
+        system:'You are a friendly Python tutor for beginners working on sep and end in print(). Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' The only correct final output is Programming***Essentials***in...Python on one line. The correct end value is exactly "..."; never recommend a newline or \\\\n in end. The second line must remain exactly print("Python"). The student has '+failedAttempts+' unsuccessful Run attempts. Do not provide the full solution before 5 unsuccessful attempts; give a useful hint instead. If the lab state says complete, never say a task is active or that more work remains.',
+        context:{activeTask:activeTask,completedTasks:complete?1:0,labComplete:complete,failedAttempts:failedAttempts,solutionUnlockAttempts:5,solutionUnlocked:failedAttempts>=5,expectedOutput:'Programming***Essentials***in...Python',requiredEnd:'...',forbiddenEnd:'...\\\\n',taskInstructions:activeGuidance,code:currentCode},
+        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to Task 1 as active.':'The active task is Task 1. Do not advance me to another task or reveal the full solution before 5 unsuccessful Run attempts.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
       })});
     if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
     var data=await res.json(); removeTypingIndicator(tid);

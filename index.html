@@ -70,7 +70,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .msg-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
 .msg-avatar.ai { background: #89b4fa; color: #1a1d23; }
 .msg-avatar.user { background: #cba6f7; color: #1a1d23; }
-.msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; }
+.msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; white-space: pre-wrap; }
 .msg.user { flex-direction: row-reverse; }
 .msg.user .msg-bubble { background: #313552; }
 .hint-chips { display: flex; gap: 6px; padding: 5px 12px; flex-wrap: wrap; background: #181b21; border-top: 1px solid #2e3440; }
@@ -255,6 +255,7 @@ var taskLog = [];
 var labInitialized = false;
 var savedPoints = 0;
 var viewedTask = 1;
+var failedAttemptsByTask = {};
 var progressSaveQueue = Promise.resolve();
 var progressSaveErrorShown = false;
 
@@ -309,6 +310,7 @@ function initLab() {
   }
 
   restoreEditorDraft();
+  loadTutorAttempts();
   updateExpectedOutput();
   viewedTask = currentTask > 5 ? 5 : currentTask;
   syncTaskNavigation();
@@ -458,6 +460,47 @@ function draftStorageKey() {
   return 'python_lab_draft_' + studentId + '_' + LAB_NUM;
 }
 
+function tutorAttemptStorageKey() {
+  var studentId = sessionStorage.getItem('lab_student_id') || 'guest';
+  return 'python_lab_tutor_attempts_' + studentId + '_' + LAB_NUM;
+}
+
+function loadTutorAttempts() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(tutorAttemptStorageKey()) || '{}');
+    failedAttemptsByTask = saved && typeof saved === 'object' ? saved : {};
+  } catch(e) {
+    failedAttemptsByTask = {};
+    console.warn('Could not restore tutor attempts:', e);
+  }
+}
+
+function saveTutorAttempts() {
+  try { localStorage.setItem(tutorAttemptStorageKey(), JSON.stringify(failedAttemptsByTask)); }
+  catch(e) { console.warn('Could not save tutor attempts:', e); }
+}
+
+function getFailedAttempts(taskNum) {
+  return Math.max(0, Number(failedAttemptsByTask[taskNum]) || 0);
+}
+
+function recordFailedAttempt(taskNum) {
+  failedAttemptsByTask[taskNum] = getFailedAttempts(taskNum) + 1;
+  saveTutorAttempts();
+  return failedAttemptsByTask[taskNum];
+}
+
+function clearTutorAttempts(taskNum) {
+  delete failedAttemptsByTask[taskNum];
+  saveTutorAttempts();
+}
+
+function resetTutorAttempts() {
+  failedAttemptsByTask = {};
+  try { localStorage.removeItem(tutorAttemptStorageKey()); }
+  catch(e) { console.warn('Could not clear tutor attempts:', e); }
+}
+
 function restoreEditorDraft() {
   try {
     var draft = localStorage.getItem(draftStorageKey());
@@ -556,6 +599,7 @@ function resetCode() {
 function resetLabToScratch() {
   try { localStorage.removeItem(draftStorageKey()); }
   catch(e) { console.warn('Could not clear the saved code draft:', e); }
+  resetTutorAttempts();
 
   savedPoints = 0;
   taskLog = [];
@@ -625,12 +669,17 @@ function runCode() {
   var sim = simulatePython(code);
   var out = document.getElementById('consoleOutput');
   var now = new Date().toLocaleTimeString();
+  var taskBeforeRun = currentTask;
   if (sim.error) {
     out.innerHTML = '<span class="err">Traceback (most recent call last):\n  File "main.py"\n'+escHtml(sim.error.msg)+'</span>';
     gradeError(code, sim.error, now);
   } else {
     out.innerHTML = sim.results.length ? sim.results.map(function(r){return '<span class="ok">'+escHtml(r)+'</span>';}).join('\n') : '<span class="sys">(no output)</span>';
     gradeSuccess(code, sim.results, now);
+  }
+  if (currentTask === taskBeforeRun && taskBeforeRun >= 1 && taskBeforeRun <= 5) {
+    var attempts = recordFailedAttempt(taskBeforeRun);
+    if (attempts === 5) addAiMessage(getSolutionUnlockedMessage(taskBeforeRun));
   }
 }
 
@@ -691,6 +740,7 @@ function completeTask(num, desc, code, output, time, pts) {
   document.getElementById(tE[num]).className='task-item done';
   document.getElementById(sE[num]).textContent='\u2713';
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
+  clearTutorAttempts(num);
   taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
   currentTask=num+1; updateScore();
   viewedTask=currentTask>5?5:currentTask;
@@ -767,12 +817,75 @@ var taskGuidance = {
   5: 'Task 5 is active. Replace the current code with two print() statements: type the first, press Enter, and type the second on the next line. Use single quotes in at least one.'
 };
 
+var taskHints = {
+  1: 'Hint: Check the capitalization, comma, space, exclamation mark, and double quotes.',
+  2: 'Hint: Put your name inside quotes so Python treats it as text, and add it on the next line.',
+  3: 'Hint: Edit the existing name statement and remove only the quotation marks.',
+  4: 'Hint: The requested SyntaxError happens when print is written without its usual parentheses. Edit the current line only.',
+  5: 'Hint: You need two separate print() calls on two lines, with single quotes used in at least one call.'
+};
+
 function getTaskGuidance() {
   return currentTask > 5 ? 'All five tasks are complete. You can download your report.' : taskGuidance[currentTask];
 }
 
 function isProgressQuestion(text) {
   return /^(what('?s| is) next|next|what (do|should) i do( next)?|which task( is next)?|help me continue)[?.!]*$/i.test(text.trim());
+}
+
+function isSolutionRequest(text) {
+  var question = text.trim();
+  return /^(solution|answer|full code|correct code)[?.!]*$/i.test(question) ||
+    /\b(give|show|provide|tell|send)\b.*\b(solution|answer|full code|correct code|finished code)\b/i.test(question) ||
+    /\bwhat('?s| is) the (solution|answer|correct code)\b/i.test(question);
+}
+
+function getTaskSolution(taskNum) {
+  var name = student.firstName || 'Student';
+  var solutions = {
+    1: 'print("Hello, Python!")',
+    2: 'Keep the Task 1 line, press Enter, and add:\nprint("' + name + '")',
+    3: 'On the existing first-name line, use:\nprint(' + name + ')',
+    4: 'On the current line, use:\nprint "Hello"',
+    5: "Replace the current code with these two lines:\nprint('Hello')\nprint(\"Python\")"
+  };
+  return solutions[taskNum] || 'This task is already complete.';
+}
+
+function getSolutionUnlockedMessage(taskNum) {
+  return 'You have made 5 unsuccessful Run attempts on Task ' + taskNum +
+    '. Here is the exact solution:\n' + getTaskSolution(taskNum);
+}
+
+function getSolutionWaitingMessage(taskNum) {
+  var attempts = getFailedAttempts(taskNum);
+  var remaining = Math.max(0, 5 - attempts);
+  return 'I will keep helping without giving the full answer yet. You have ' +
+    attempts + ' of 5 unsuccessful Run attempts on Task ' + taskNum + '. ' +
+    (remaining ? 'Try the hint below; the exact solution unlocks after ' + remaining +
+      ' more unsuccessful attempt' + (remaining === 1 ? '' : 's') + '.\n' : '') +
+    taskHints[taskNum];
+}
+
+function containsFullTaskSolution(reply, taskNum) {
+  var text = String(reply || '').replace(/\s+/g, ' ');
+  var name = student.firstName || 'Student';
+  if (taskNum === 1) return text.indexOf('print("Hello, Python!")') !== -1;
+  if (taskNum === 2) return text.indexOf('print("' + name + '")') !== -1 ||
+    text.indexOf("print('" + name + "')") !== -1;
+  if (taskNum === 3) return text.indexOf('print(' + name + ')') !== -1;
+  if (taskNum === 4) return /print\s+(['"])Hello\1/.test(text);
+  if (taskNum === 5) return (text.match(/print\s*\(/g) || []).length >= 2;
+  return false;
+}
+
+function validateTutorReply(reply, taskNum) {
+  var text = String(reply || '');
+  if (taskNum <= 5 && getFailedAttempts(taskNum) < 5 &&
+      containsFullTaskSolution(text, taskNum)) {
+    return getSolutionWaitingMessage(taskNum);
+  }
+  return text;
 }
 
 async function sendMessage() {
@@ -783,10 +896,18 @@ async function sendMessage() {
     addAiMessage(getTaskGuidance());
     return;
   }
+  if (isSolutionRequest(text)) {
+    if (currentTask > 5) addAiMessage(getTaskGuidance());
+    else if (getFailedAttempts(currentTask) >= 5) addAiMessage(getSolutionUnlockedMessage(currentTask));
+    else addAiMessage(getSolutionWaitingMessage(currentTask));
+    return;
+  }
   var tid=addTypingIndicator();
   try {
     var currentCode = document.getElementById('editor').value;
-    var activeTask = Math.min(currentTask,5);
+    var complete = currentTask > 5;
+    var activeTask = complete ? null : currentTask;
+    var failedAttempts = complete ? 0 : getFailedAttempts(activeTask);
     var activeGuidance = getTaskGuidance();
     var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
       'Content-Type':'application/json',
@@ -794,13 +915,13 @@ async function sendMessage() {
       'Authorization':'Bearer '+SUPABASE_KEY
     },
       body:JSON.stringify({
-        system:'You are a friendly Python tutor for beginners. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. ACTIVE TASK: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. Never give a full solution.',
-        context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),taskInstructions:activeGuidance,code:currentCode},
-        messages:[{role:'user',content:'The active task is Task '+activeTask+'. Do not advance me to another task.\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
+        system:'You are a friendly Python tutor for beginners. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. The student has '+failedAttempts+' unsuccessful Run attempts on the active task. Do not provide the full solution before 5 unsuccessful attempts; give a useful hint instead. If the lab is complete, never say a task is active.',
+        context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),labComplete:complete,failedAttempts:failedAttempts,solutionUnlockAttempts:5,solutionUnlocked:failedAttempts>=5,taskInstructions:activeGuidance,code:currentCode},
+        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to a task as active.':'The active task is Task '+activeTask+'. Do not advance me to another task or reveal its full solution before 5 unsuccessful Run attempts.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
       })});
     if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
     var data=await res.json(); removeTypingIndicator(tid);
-    addAiMessage(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!");
+    addAiMessage(validateTutorReply(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!", activeTask));
   } catch(e) { removeTypingIndicator(tid); addAiMessage("Connection issue — the AI tutor is temporarily unavailable. The lab grading still works!"); }
 }
 
