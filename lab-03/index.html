@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.1.1.19 LAB: Formatting the output</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1d23; color: #cdd6f4; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+.topbar { background: #181b21; border-bottom: 1px solid #2e3440; padding: 0 16px; height: 44px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-nav { display: flex; align-items: center; gap: 12px; color: #89b4fa; font-size: 13px; }
+.lab-badge { background: #f5a623; color: #1a1d23; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+.progress-bars { background: #181b21; padding: 6px 16px; display: flex; gap: 32px; border-bottom: 1px solid #2e3440; flex-shrink: 0; }
+.prog-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #6c7086; }
+.prog-track { width: 100px; height: 5px; background: #2e3440; border-radius: 3px; }
+.prog-fill { height: 100%; border-radius: 3px; }
+.toolbar { background: #1e2230; border-bottom: 1px solid #2e3440; height: 38px; display: flex; align-items: center; padding: 0 8px; gap: 4px; flex-shrink: 0; }
+.toolbar button { background: none; border: none; color: #6c7086; cursor: pointer; padding: 5px 8px; border-radius: 4px; font-size: 13px; }
+.toolbar button:hover { background: #2e3440; color: #cdd6f4; }
+.run-btn { background: #89b4fa !important; color: #1a1d23 !important; font-weight: 600 !important; }
+.save-btn { border: 1px solid #a6e3a1 !important; color: #a6e3a1 !important; font-weight: 600 !important; min-width: 70px; }
+.save-btn.saved { background: #a6e3a1 !important; color: #1a1d23 !important; }
+.save-btn.failed { border-color: #f38ba8 !important; color: #f38ba8 !important; }
+.sep { width: 1px; height: 20px; background: #2e3440; margin: 0 4px; }
+.score-display { margin-left: auto; font-size: 12px; color: #a6adc8; display: flex; align-items: center; gap: 6px; }
+.score-num { font-weight: 700; color: #a6e3a1; font-size: 14px; }
+.pdf-btn { background: #a6e3a1 !important; color: #1a1d23 !important; font-weight: 700 !important; display: none; }
+.main { display: flex; flex: 1; overflow: hidden; }
+.left-panel { width: 44%; border-right: 1px solid #2e3440; overflow-y: auto; padding: 20px 22px; flex-shrink: 0; }
+.left-panel h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin-bottom: 6px; margin-top: 16px; }
+.left-panel h2:first-child { margin-top: 0; }
+.left-panel p { color: #a6adc8; line-height: 1.6; margin-bottom: 8px; font-size: 13px; }
+code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 12px; }
+.task-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #2e3440; background: #181b21; transition: all 0.3s; }
+.task-item.active { border-color: #89b4fa; background: #1a2035; }
+.task-item.done { border-color: #a6e3a1; background: #0d1f14; }
+.task-item.reviewing { box-shadow: 0 0 0 2px #cba6f7; }
+.task-item.locked { opacity: 0.45; }
+.task-status { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3d4455; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; }
+.task-item.done .task-status { border-color: #a6e3a1; background: #a6e3a1; color: #1a1d23; }
+.task-item.active .task-status { border-color: #89b4fa; }
+.task-label { font-size: 12px; color: #6c7086; line-height: 1.5; flex: 1; }
+.task-summary { font-weight: 600; margin-bottom: 3px; }
+.task-instruction strong { font-weight: 600; }
+.task-item.active .task-label { color: #cdd6f4; }
+.task-item.done .task-label { color: #a6e3a1; }
+.task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
+.task-item.done .task-pts { color: #a6e3a1; font-weight: 700; }
+.complete-banner { display: none; background: #0d1f14; border: 1px solid #a6e3a1; border-radius: 8px; padding: 10px 14px; margin: 10px 0 4px; font-size: 13px; color: #a6e3a1; text-align: center; }
+.instruction-note { background: #1a2035; border: 1px solid #89b4fa66; border-radius: 6px; padding: 9px 11px; margin: 9px 0; color: #cdd6f4; font-size: 12px; line-height: 1.55; }
+.expected-output-box { background: #181b21; border: 1px solid #3d4455; border-radius: 6px; padding: 9px 11px; margin-bottom: 10px; }
+.expected-output-box code { display: block; background: transparent; padding: 0; color: #a6e3a1; white-space: pre-wrap; line-height: 1.5; }
+.right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.editor-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.editor-header { background: #1e2230; padding: 6px 12px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #2e3440; }
+.editor-body { display: flex; flex: 1; overflow: hidden; }
+.line-nums { background: #181b21; padding: 10px; color: #4a4f68; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; text-align: right; user-select: none; min-width: 36px; border-right: 1px solid #2e3440; }
+#editor { flex: 1; background: #1e2230; color: #cdd6f4; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; padding: 10px 14px; border: none; outline: none; resize: none; tab-size: 4; }
+.console-area { border-top: 1px solid #2e3440; flex-shrink: 0; }
+.console-header { background: #181b21; padding: 6px 12px; font-size: 12px; color: #6c7086; }
+.console-output { background: #181b21; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 13px; min-height: 70px; max-height: 100px; overflow-y: auto; white-space: pre-wrap; }
+.err { color: #f38ba8; } .sys { color: #6c7086; } .ok { color: #a6e3a1; }
+.ai-panel { border-top: 2px solid #89b4fa; display: flex; flex-direction: column; flex-shrink: 0; }
+.ai-header { background: #181b21; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2e3440; }
+.ai-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #89b4fa; }
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #a6e3a1; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.ai-chat { max-height: 110px; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #1a1d23; }
+.msg { display: flex; gap: 8px; align-items: flex-start; }
+.msg-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+.msg-avatar.ai { background: #89b4fa; color: #1a1d23; }
+.msg-avatar.user { background: #cba6f7; color: #1a1d23; }
+.msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; white-space: pre-wrap; }
+.msg.user { flex-direction: row-reverse; }
+.msg.user .msg-bubble { background: #313552; }
+.hint-chips { display: flex; gap: 6px; padding: 5px 12px; flex-wrap: wrap; background: #181b21; border-top: 1px solid #2e3440; }
+.chip { background: #2e3440; border: 1px solid #3d4455; border-radius: 12px; padding: 3px 10px; font-size: 11px; color: #89b4fa; cursor: pointer; white-space: nowrap; }
+.chip:hover { background: #3d4455; }
+.ai-input-row { display: flex; gap: 8px; padding: 7px 12px; border-top: 1px solid #2e3440; background: #181b21; }
+.ai-input-row input { flex: 1; background: #2e3440; border: 1px solid #3d4455; border-radius: 6px; padding: 6px 10px; color: #cdd6f4; font-size: 12px; outline: none; }
+.ai-input-row input:focus { border-color: #89b4fa; }
+.ai-input-row button { background: #89b4fa; border: none; border-radius: 6px; padding: 6px 14px; color: #1a1d23; font-size: 12px; font-weight: 600; cursor: pointer; }
+.nav-btn { background: transparent; border: 1px solid #89b4fa; color: #89b4fa; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.nav-btn.next { background: #89b4fa; color: #1a1d23; font-weight: 600; }
+.nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.typing-indicator span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #89b4fa; margin: 0 2px; animation: bounce 1s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)} }
+
+@media (max-width: 800px) {
+  body { height: auto; min-height: 100vh; overflow: auto; }
+  .topbar { height: auto; min-height: 44px; flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
+  .topbar-nav { order: 3; width: 100%; justify-content: center; }
+  .progress-bars { gap: 12px; flex-wrap: wrap; }
+  .main { display: block; overflow: visible; }
+  .left-panel { width: 100%; border-right: 0; border-bottom: 1px solid #2e3440; padding: 16px; }
+  .right-panel { min-height: 720px; overflow: visible; }
+  .editor-area { min-height: 300px; }
+  .ai-chat { max-height: 180px; }
+  .hint-chips { overflow-x: auto; flex-wrap: nowrap; }
+}
+
+@media (max-width: 480px) {
+  .progress-bars { display: none; }
+  .toolbar { height: auto; min-height: 38px; flex-wrap: wrap; padding: 6px 8px; }
+  .score-display { margin-left: auto; }
+  .left-panel { padding: 14px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-weight:700;color:#89b4fa;font-size:15px;">Python<span style="color:#f5a623;">PI</span></span>
+    <span class="lab-badge">LAB</span>
+  </div>
+  <div class="topbar-nav">
+    <span>2.1.1.19 LAB: Formatting the output</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="studentLabel" style="font-size:12px;color:#6c7086;"></span>
+    <button onclick="window.location.href='https://stcportal.ddns.net'" style="background:none;border:1px solid #3d4455;border-radius:5px;padding:3px 10px;color:#6c7086;font-size:11px;cursor:pointer;">&#8592; Portal</button>
+  </div>
+</div>
+
+<div class="progress-bars">
+  <div class="prog-item"><span>MODULE (28%)</span><div class="prog-track"><div class="prog-fill" style="width:28%;background:#89b4fa;"></div></div></div>
+  <div class="prog-item"><span>SECTION (95%)</span><div class="prog-track"><div class="prog-fill" style="width:95%;background:#a6e3a1;"></div></div></div>
+</div>
+
+<div class="toolbar">
+  <button class="run-btn" onclick="runCode()">&#9654; Run</button>
+  <div class="sep"></div>
+  <button onclick="copyEditor()">Copy</button>
+  <button onclick="resetCode()">Reset</button>
+  <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save task progress and this code draft">&#128190; Save</button>
+  <div class="score-display">Score: <span class="score-num" id="scoreDisplay">0</span> / 13.5</div>
+  <div style="margin-left:12px;">
+    <button class="pdf-btn" id="pdfBtn" onclick="generatePDF()">Download Report</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left-panel">
+    <h2>Estimated time</h2><p>5-15 minutes</p>
+    <h2>Level of difficulty</h2><p>Easy</p>
+    <h2>Objectives</h2>
+    <ul style="padding-left:16px;list-style:disc;color:#a6adc8;font-size:13px;line-height:1.9;">
+      <li>Experimenting with existing Python code</li>
+      <li>Discovering and fixing basic syntax errors</li>
+      <li>Becoming familiar with <code>print()</code> formatting capabilities</li>
+    </ul>
+    <h2>Scenario</h2>
+    <p>Experiment with the provided arrow code. Use <code>\n</code> to reduce calls, enlarge and duplicate the arrow, deliberately create errors, and then restore valid output using single quotes.</p>
+    <h2>Expected output or result</h2>
+    <div class="expected-output-box"><code id="expectedOutput">    *
+   * *
+  *   *
+ *     *
+***   ***
+  *   *
+  *   *
+  *****</code></div>
+    <div class="complete-banner" id="completeBanner">&#127881; Lab complete! 13.5 / 13.5 points — Download your report above.</div>
+    <h2 style="margin-top:14px;">Tasks</h2>
+    <div class="task-item active" id="task1">
+      <div class="task-status" id="t1s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 1</strong> — Run the original arrow</div>
+        <div class="task-instruction"><strong>What to do:</strong> Keep the provided eight <code>print()</code> statements unchanged and click <strong>Run</strong> to produce the original arrow.</div>
+      </div>
+      <div class="task-pts" id="t1p">2 pts</div>
+    </div>
+    <div class="task-item locked" id="task2">
+      <div class="task-status" id="t2s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 2</strong> — Produce the same arrow with fewer <code>print()</code> calls</div>
+        <div class="task-instruction"><strong>What to do:</strong> Replace the eight calls with no more than two <code>print()</code> statements. Insert <code>\n</code> inside the strings to create the eight output lines.</div>
+      </div>
+      <div class="task-pts" id="t2p">2.5 pts</div>
+    </div>
+    <div class="task-item locked" id="task3">
+      <div class="task-status" id="t3s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 3</strong> — Make two larger arrows side by side</div>
+        <div class="task-instruction"><strong>What to do:</strong> Enlarge the arrow to at least 12 output lines, keep its proportions, and duplicate each row using string multiplication with <code>* 2</code>.</div>
+      </div>
+      <div class="task-pts" id="t3p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task4">
+      <div class="task-status" id="t4s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 4</strong> — Discover a <code>SyntaxError</code></div>
+        <div class="task-instruction"><strong>What to do:</strong> Remove one quotation mark or one parenthesis from a <code>print()</code> statement, then click <strong>Run</strong> and observe where Python reports the error.</div>
+      </div>
+      <div class="task-pts" id="t4p">2 pts</div>
+    </div>
+    <div class="task-item locked" id="task5">
+      <div class="task-status" id="t5s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 5</strong> — Discover that Python names are case-sensitive</div>
+        <div class="task-instruction"><strong>What to do:</strong> Replace lowercase <code>print</code> with uppercase <code>Print</code> on one line, then click <strong>Run</strong> to produce a <code>NameError</code>.</div>
+      </div>
+      <div class="task-pts" id="t5p">1.5 pts</div>
+    </div>
+    <div class="task-item locked" id="task6">
+      <div class="task-status" id="t6s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 6</strong> — Restore the arrow using single quotes</div>
+        <div class="task-instruction"><strong>What to do:</strong> Replace the current code with the original eight-line arrow, use lowercase <code>print</code>, and use apostrophes (single quotes) around every string.</div>
+      </div>
+      <div class="task-pts" id="t6p">2.5 pts</div>
+    </div>
+    <div style="height:48px;"></div>
+    <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
+      <button class="nav-btn" id="prevTaskBtn" onclick="showTask(-1)">&#8592; Previous Task</button>
+      <button class="nav-btn next" id="nextTaskBtn" onclick="showTask(1)">Next Task &#8594;</button>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="editor-area">
+      <div class="editor-header">main.py</div>
+      <div class="editor-body">
+        <div class="line-nums" id="lineNums">1</div>
+        <textarea id="editor" spellcheck="false" oninput="updateLines()" onkeydown="handleTab(event)">print("    *")
+print("   * *")
+print("  *   *")
+print(" *     *")
+print("***   ***")
+print("  *   *")
+print("  *   *")
+print("  *****")</textarea>
+      </div>
+    </div>
+    <div class="console-area">
+      <div class="console-header">Console</div>
+      <div class="console-output" id="consoleOutput"><span class="sys">Ready. Click Run to execute your code.</span></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-header">
+        <div class="ai-title"><div class="ai-dot"></div>AI Tutor</div>
+        <span style="font-size:11px;color:#6c7086;">Powered by Claude</span>
+      </div>
+      <div class="ai-chat" id="aiChat">
+        <div class="msg ai">
+          <div class="msg-avatar ai">AI</div>
+          <div class="msg-bubble" id="welcomeMsg">Welcome! Loading...</div>
+        </div>
+      </div>
+      <div class="hint-chips">
+        <div class="chip" onclick="askChip('How does backslash n work?')">Using \n</div>
+        <div class="chip" onclick="askChip('How does string multiplication work?')">String multiplication</div>
+        <div class="chip" onclick="askChip('What is a SyntaxError?')">SyntaxError?</div>
+        <div class="chip" onclick="askChip('Why is Print different from print?')">Case sensitivity</div>
+      </div>
+      <div class="ai-input-row">
+        <input type="text" id="aiInput" placeholder="Ask your tutor anything..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button onclick="sendMessage()">Ask</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SUPABASE_URL = 'https://otseertzdwjrfkrdzutu.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90c2VlcnR6ZHdqcmZrcmR6dXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODYzNTYsImV4cCI6MjEwMDU2MjM1Nn0.Wp9xkgiyEjWSgChSL6j20V7YtUxadq9H8UPpm2ip6RM';
+var LAB_NUM = 3;
+var LAB_PTS = 13.5;
+
+var student = {};
+var labStartTime = new Date();
+var currentTask = 1;
+var taskLog = [];
+var labInitialized = false;
+var savedPoints = 0;
+var viewedTask = 1;
+var failedAttemptsByTask = {};
+var progressSaveQueue = Promise.resolve();
+var progressSaveErrorShown = false;
+
+function initLab() {
+  if (labInitialized) return;
+  labInitialized = true;
+  var params = new URLSearchParams(window.location.search);
+  var firstName  = params.get('firstName');
+  var lastName   = params.get('lastName');
+  var course     = params.get('course');
+  var section    = params.get('section');
+  var instructor = params.get('instructor');
+  var studentId  = params.get('studentId');
+  var completed  = params.get('completed');
+
+  if (firstName) {
+    // Save to sessionStorage so refresh works
+    sessionStorage.setItem('lab_info', JSON.stringify({
+      firstName: firstName, lastName: lastName,
+      course: course, section: section,
+      instructor: instructor, studentId: studentId,
+      completed: completed
+    }));
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // Load from sessionStorage if no params
+  var info = sessionStorage.getItem('lab_info');
+  if (info) {
+    try {
+      var d = JSON.parse(info);
+      student = { firstName: d.firstName||'Student', lastName: d.lastName||'', course: d.course||'ITSE-2421', section: d.section||'', instructor: d.instructor||'Mr. Hector Trevino' };
+      if (d.studentId) sessionStorage.setItem('lab_student_id', d.studentId);
+      completed = d.completed;
+    } catch(e) { student = { firstName:'Student', lastName:'', course:'ITSE-2421', section:'', instructor:'Mr. Hector Trevino' }; }
+  } else {
+    student = { firstName: firstName||'Student', lastName: lastName||'', course: course||'ITSE-2421', section: section||'', instructor: instructor||'Mr. Hector Trevino' };
+  }
+
+  document.getElementById('studentLabel').textContent = student.firstName + ' ' + student.lastName;
+
+  if (completed === 'true') {
+    for (var i = 1; i <= 6; i++) { completeTaskSilent(i); }
+    currentTask = 7;
+    savedPoints = LAB_PTS;
+    document.getElementById('completeBanner').style.display = 'block';
+    document.getElementById('pdfBtn').style.display = 'inline-block';
+    document.getElementById('scoreDisplay').textContent = String(LAB_PTS);
+    document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! You already completed this lab. You can review or download your report.';
+  } else {
+    document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 — run the provided eight-line arrow code.';
+  }
+
+  restoreEditorDraft();
+  loadTutorAttempts();
+  updateExpectedOutput();
+  viewedTask = currentTask > 6 ? 6 : currentTask;
+  syncTaskNavigation();
+}
+
+// The script is at the end of the page, so the interface is ready now. The
+// guard also makes this safe if a browser fires DOMContentLoaded afterward.
+initLab();
+loadSavedProgress();
+
+function completedTaskCountForPoints(points) {
+  if (points >= 13.5) return 6;
+  if (points >= 11) return 5;
+  if (points >= 9.5) return 4;
+  if (points >= 7.5) return 3;
+  if (points >= 4.5) return 2;
+  if (points >= 2) return 1;
+  return 0;
+}
+
+function updateExpectedOutput() {
+  var originalArrow = '    *\n   * *\n  *   *\n *     *\n***   ***\n  *   *\n  *   *\n  *****';
+  var expected = {
+    1: originalArrow,
+    2: originalArrow,
+    3: 'Two proportional, larger arrows side by side; at least 12 output lines',
+    4: 'SyntaxError caused by a missing quote or parenthesis',
+    5: "NameError: name 'Print' is not defined",
+    6: originalArrow
+  };
+  document.getElementById('expectedOutput').textContent =
+    currentTask > 6 ? 'Lab complete — 13.5 / 13.5 points' : expected[currentTask];
+}
+
+async function loadSavedProgress() {
+  var studentId = sessionStorage.getItem('lab_student_id');
+  if (!studentId) return;
+  try {
+    var progressRes = await fetch(SUPABASE_URL + '/rest/v1/lab_progress?student_id=eq.' + encodeURIComponent(studentId) + '&lab_num=eq.' + LAB_NUM + '&limit=1', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!progressRes.ok) throw new Error('Progress load failed (' + progressRes.status + ')');
+    var rows = await progressRes.json();
+    if (taskLog.length > 0) return;
+    if (!rows || !rows.length) {
+      resetLabToScratch();
+      return;
+    }
+    if (currentTask > 1) return;
+
+    var record = rows[0];
+    var points = Math.max(0, Math.min(LAB_PTS, Number(record.points) || 0));
+    var doneCount = record.completed ? 6 : completedTaskCountForPoints(points);
+    if (!doneCount) return;
+
+    savedPoints = points;
+    for (var i = 1; i <= doneCount; i++) completeTaskSilent(i);
+    currentTask = doneCount >= 6 ? 7 : doneCount + 1;
+    viewedTask = currentTask > 6 ? 6 : currentTask;
+    updateScore();
+    updateExpectedOutput();
+    syncTaskNavigation();
+
+    if (currentTask <= 6) {
+      document.getElementById('task' + currentTask).className = 'task-item active';
+      document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! Your progress was restored. Continue with Task ' + currentTask + '.';
+      addAiMessage('I restored your saved progress. You are ready for Task ' + currentTask + '.');
+    } else {
+      savedPoints = LAB_PTS;
+      document.getElementById('completeBanner').style.display = 'block';
+      document.getElementById('pdfBtn').style.display = 'inline-block';
+      document.getElementById('scoreDisplay').textContent = String(LAB_PTS);
+      document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! You already completed this lab.';
+    }
+  } catch(e) {
+    console.error('Could not load saved progress:', e);
+  }
+}
+
+function queueProgressSave(points, isComplete) {
+  progressSaveQueue = progressSaveQueue.then(function() {
+    return saveLabProgress(points, isComplete);
+  });
+  return progressSaveQueue;
+}
+
+async function saveLabProgress(points, isComplete) {
+  var studentId = sessionStorage.getItem('lab_student_id');
+  if (!studentId) return false;
+  try {
+    var filter = '?student_id=eq.' + encodeURIComponent(studentId) + '&lab_num=eq.' + LAB_NUM;
+    var checkRes = await fetch(SUPABASE_URL + '/rest/v1/lab_progress' + filter, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!checkRes.ok) throw new Error('Progress check failed (' + checkRes.status + ')');
+    var existing = await checkRes.json();
+
+    // Never replace saved progress with an earlier attempt.
+    if (!isComplete && existing && existing[0] &&
+        (existing[0].completed || Number(existing[0].points || 0) > points)) return true;
+
+    var method = (existing && existing.length > 0) ? 'PATCH' : 'POST';
+    var url = SUPABASE_URL + '/rest/v1/lab_progress' + (method === 'PATCH' ? filter : '');
+    var payload = {
+      student_id: String(studentId),
+      lab_num: LAB_NUM,
+      completed: Boolean(isComplete),
+      points: points
+    };
+    if (isComplete) payload.completed_at = new Date().toISOString();
+
+    var saveRes = await fetch(url, {
+      method: method,
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload)
+    });
+    if (!saveRes.ok) {
+      var details = await saveRes.text();
+      throw new Error('Progress save failed (' + saveRes.status + '): ' + details.slice(0, 250));
+    }
+
+    progressSaveErrorShown = false;
+
+    if (isComplete) {
+      var info = sessionStorage.getItem('lab_info');
+      if (info) {
+        var d = JSON.parse(info);
+        d.completed = 'true';
+        sessionStorage.setItem('lab_info', JSON.stringify(d));
+      }
+    }
+    return true;
+  } catch(e) {
+    console.error('Could not save progress:', e);
+    if (isComplete) {
+      document.getElementById('completeBanner').textContent = 'Lab complete locally, but progress could not be saved. Check your connection and click Run again.';
+      document.getElementById('completeBanner').style.borderColor = '#f9e2af';
+      document.getElementById('completeBanner').style.color = '#f9e2af';
+    }
+    if (!progressSaveErrorShown) {
+      progressSaveErrorShown = true;
+      addAiMessage('I could not save your progress to the portal. Check your connection, then click Run again.');
+    }
+    return false;
+  }
+}
+
+function draftStorageKey() {
+  var studentId = sessionStorage.getItem('lab_student_id') || 'guest';
+  return 'python_lab_draft_' + studentId + '_' + LAB_NUM;
+}
+
+function tutorAttemptStorageKey() {
+  var studentId = sessionStorage.getItem('lab_student_id') || 'guest';
+  return 'python_lab_tutor_attempts_' + studentId + '_' + LAB_NUM;
+}
+
+function loadTutorAttempts() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(tutorAttemptStorageKey()) || '{}');
+    failedAttemptsByTask = saved && typeof saved === 'object' ? saved : {};
+  } catch(e) {
+    failedAttemptsByTask = {};
+    console.warn('Could not restore tutor attempts:', e);
+  }
+}
+
+function saveTutorAttempts() {
+  try { localStorage.setItem(tutorAttemptStorageKey(), JSON.stringify(failedAttemptsByTask)); }
+  catch(e) { console.warn('Could not save tutor attempts:', e); }
+}
+
+function getFailedAttempts(taskNum) {
+  return Math.max(0, Number(failedAttemptsByTask[taskNum]) || 0);
+}
+
+function recordFailedAttempt(taskNum) {
+  failedAttemptsByTask[taskNum] = getFailedAttempts(taskNum) + 1;
+  saveTutorAttempts();
+  return failedAttemptsByTask[taskNum];
+}
+
+function clearTutorAttempts(taskNum) {
+  delete failedAttemptsByTask[taskNum];
+  saveTutorAttempts();
+}
+
+function resetTutorAttempts() {
+  failedAttemptsByTask = {};
+  try { localStorage.removeItem(tutorAttemptStorageKey()); }
+  catch(e) { console.warn('Could not clear tutor attempts:', e); }
+}
+
+function restoreEditorDraft() {
+  try {
+    var draft = localStorage.getItem(draftStorageKey());
+    if (draft !== null) {
+      document.getElementById('editor').value = draft;
+      updateLines();
+    }
+  } catch(e) {
+    console.warn('Could not restore the code draft:', e);
+  }
+}
+
+function saveEditorDraftLocally() {
+  try {
+    localStorage.setItem(draftStorageKey(), document.getElementById('editor').value);
+    return true;
+  } catch(e) {
+    console.warn('Could not save the code draft:', e);
+    return false;
+  }
+}
+
+async function manualSave() {
+  var button = document.getElementById('saveBtn');
+  var originalText = '&#128190; Save';
+  button.disabled = true;
+  button.className = 'save-btn';
+  button.textContent = 'Saving...';
+
+  saveEditorDraftLocally();
+
+  var points = Number(document.getElementById('scoreDisplay').textContent) || 0;
+  var cloudSaved = await queueProgressSave(points, currentTask > 6);
+  button.disabled = false;
+
+  if (cloudSaved) {
+    button.className = 'save-btn saved';
+    button.textContent = '\u2713 Saved';
+  } else if (!sessionStorage.getItem('lab_student_id')) {
+    button.className = 'save-btn saved';
+    button.textContent = '\u2713 Draft saved';
+  } else {
+    button.className = 'save-btn failed';
+    button.textContent = 'Save failed';
+  }
+
+  setTimeout(function() {
+    button.className = 'save-btn';
+    button.innerHTML = originalText;
+  }, 2500);
+}
+
+function updateLines() {
+  var n = document.getElementById('editor').value.split('\n').length;
+  var html = '';
+  for (var i = 1; i <= n; i++) { html += i + '<br>'; }
+  document.getElementById('lineNums').innerHTML = html;
+}
+
+function syncTaskNavigation() {
+  var maxTask = currentTask > 6 ? 6 : currentTask;
+  viewedTask = Math.max(1, Math.min(viewedTask, maxTask));
+  var previousButton = document.getElementById('prevTaskBtn');
+  var nextButton = document.getElementById('nextTaskBtn');
+  if (previousButton) previousButton.disabled = viewedTask <= 1;
+  if (nextButton) nextButton.disabled = viewedTask >= maxTask;
+}
+
+function showTask(direction) {
+  var maxTask = currentTask > 6 ? 6 : currentTask;
+  viewedTask = Math.max(1, Math.min(viewedTask + direction, maxTask));
+  syncTaskNavigation();
+
+  var taskElement = document.getElementById('task' + viewedTask);
+  if (!taskElement) return;
+  taskElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  taskElement.classList.add('reviewing');
+  setTimeout(function() { taskElement.classList.remove('reviewing'); }, 1200);
+}
+
+function handleTab(e) {
+  if (e.key !== 'Tab') return;
+  e.preventDefault();
+  var ta = document.getElementById('editor'), s = ta.selectionStart;
+  ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(ta.selectionEnd);
+  ta.selectionStart = ta.selectionEnd = s + 4;
+  updateLines();
+}
+
+var ORIGINAL_ARROW = '    *\n   * *\n  *   *\n *     *\n***   ***\n  *   *\n  *   *\n  *****';
+var STARTER_CODE = 'print("    *")\nprint("   * *")\nprint("  *   *")\nprint(" *     *")\nprint("***   ***")\nprint("  *   *")\nprint("  *   *")\nprint("  *****")';
+var FEWER_PRINT_CODE = 'print("    *\\n   * *\\n  *   *\\n *     *\\n***   ***")\nprint("  *   *\\n  *   *\\n  *****")';
+var LARGE_DOUBLE_CODE = 'print("        *        " * 2)\nprint("       * *       " * 2)\nprint("      *   *      " * 2)\nprint("     *     *     " * 2)\nprint("    *       *    " * 2)\nprint("   *         *   " * 2)\nprint("  *           *  " * 2)\nprint(" *             * " * 2)\nprint("******       ******" * 2)\nprint("    *       *    " * 2)\nprint("    *       *    " * 2)\nprint("    *********    " * 2)';
+var SINGLE_QUOTE_CODE = "print('    *')\nprint('   * *')\nprint('  *   *')\nprint(' *     *')\nprint('***   ***')\nprint('  *   *')\nprint('  *   *')\nprint('  *****')";
+
+function resetCode() {
+  document.getElementById('editor').value = STARTER_CODE;
+  updateLines();
+  document.getElementById('consoleOutput').innerHTML = '<span class="sys">Code reset.</span>';
+}
+
+function resetLabToScratch() {
+  try { localStorage.removeItem(draftStorageKey()); }
+  catch(e) { console.warn('Could not clear the saved code draft:', e); }
+  resetTutorAttempts();
+
+  savedPoints = 0;
+  taskLog = [];
+  currentTask = 1;
+  viewedTask = 1;
+  progressSaveErrorShown = false;
+
+  var taskIds = ['','task1','task2','task3','task4','task5','task6'];
+  var statusIds = ['','t1s','t2s','t3s','t4s','t5s','t6s'];
+  var pointIds = ['','t1p','t2p','t3p','t4p','t5p','t6p'];
+  var pointValues = [0,2,2.5,3,2,1.5,2.5];
+  for (var i = 1; i <= 6; i++) {
+    document.getElementById(taskIds[i]).className = 'task-item ' + (i === 1 ? 'active' : 'locked');
+    document.getElementById(statusIds[i]).textContent = '';
+    document.getElementById(pointIds[i]).textContent = pointValues[i] + ' pts';
+  }
+
+  var banner = document.getElementById('completeBanner');
+  banner.style.display = 'none';
+  banner.style.borderColor = '#a6e3a1';
+  banner.style.color = '#a6e3a1';
+  banner.textContent = '\uD83C\uDF89 Lab complete! 13.5 / 13.5 points \u2014 Download your report above.';
+  document.getElementById('pdfBtn').style.display = 'none';
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 \u2014 run the provided arrow code.';
+
+  var info = sessionStorage.getItem('lab_info');
+  if (info) {
+    try {
+      var data = JSON.parse(info);
+      data.completed = 'false';
+      sessionStorage.setItem('lab_info', JSON.stringify(data));
+    } catch(e) { console.warn('Could not reset the saved lab session:', e); }
+  }
+  resetCode();
+  updateExpectedOutput();
+  syncTaskNavigation();
+}
+
+function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function decodePythonString(raw) {
+  return raw.replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\r/g, '\r')
+    .replace(/\\\\/g, '\\')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'");
+}
+
+function simulatePython(code) {
+  var lines = code.split('\n'), output = '', calls = [], error = null;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line || line.charAt(0) === '#') continue;
+    if (/^Print\s*\(/.test(line)) {
+      error = {type:'NameError',msg:"NameError: name 'Print' is not defined"};
+      break;
+    }
+    if (/^print\b/.test(line) && !/^print\s*\(/.test(line)) {
+      error = {type:'SyntaxError',msg:"SyntaxError: Missing parentheses in call to 'print'"};
+      break;
+    }
+    var match = line.match(/^print\s*\(\s*(["'])((?:\\.|[^\\])*?)\1\s*(?:\*\s*(\d+))?\s*\)\s*$/);
+    if (!match) {
+      error = {type:'SyntaxError',msg:'SyntaxError: unterminated string literal or missing parenthesis on line '+(i+1)};
+      break;
+    }
+    var value = decodePythonString(match[2]);
+    var multiplier = match[3] ? Number(match[3]) : 1;
+    var rendered = value.repeat(multiplier);
+    output += rendered + '\n';
+    calls.push({source:line,value:value,multiplier:multiplier});
+  }
+  return {text:output,calls:calls,error:error};
+}
+
+function runCode() {
+  var code = document.getElementById('editor').value;
+  var sim = simulatePython(code);
+  var out = document.getElementById('consoleOutput');
+  var now = new Date().toLocaleTimeString();
+  var taskBeforeRun = currentTask;
+  if (sim.error) {
+    out.innerHTML = '<span class="err">Traceback (most recent call last):\n  File "main.py"\n'+escHtml(sim.error.msg)+'</span>';
+    gradeError(code, sim.error, now);
+  } else {
+    var visibleOutput = sim.text.replace(/\n$/, '');
+    out.innerHTML = visibleOutput ? '<span class="ok">'+escHtml(visibleOutput)+'</span>' : '<span class="sys">(no output)</span>';
+    gradeSuccess(code, sim, now);
+  }
+  if (currentTask === taskBeforeRun && taskBeforeRun >= 1 && taskBeforeRun <= 6) {
+    var attempts = recordFailedAttempt(taskBeforeRun);
+    if (attempts === 5) addAiMessage(getSolutionUnlockedMessage(taskBeforeRun));
+  }
+}
+
+function gradeError(code, error, now) {
+  if (currentTask === 4 && error.type === 'SyntaxError') {
+    completeTask(4,'Discovered a SyntaxError by removing syntax',code,error.msg,now,2);
+    addAiMessage('Task 4 done! For Task 5, change lowercase print to uppercase Print on one line and click Run.');
+  } else if (currentTask === 5 && error.type === 'NameError' && /\bPrint\s*\(/.test(code)) {
+    completeTask(5,'Discovered case sensitivity with Print',code,error.msg,now,1.5);
+    addAiMessage('Task 5 done! For Task 6, restore the original eight-line arrow using lowercase print and single quotes around every string.');
+  } else {
+    if (currentTask === 4) addAiMessage('Task 4 needs a SyntaxError. Remove one quote or one parenthesis from a print() statement, then Run.');
+    else if (currentTask === 5) addAiMessage('Task 5 needs a NameError caused by changing lowercase print to uppercase Print.');
+    else addAiMessage('Fix the syntax error so the current task can check the arrow output.');
+  }
+}
+
+function gradeSuccess(code, sim, now) {
+  var codeLines = code.split('\n').map(function(l){return l.trim();}).filter(function(l){return l && l.charAt(0)!=='#';});
+  var output = sim.text.replace(/\n$/, '');
+  if (currentTask === 1) {
+    if (output === ORIGINAL_ARROW && sim.calls.length === 8) {
+      completeTask(1,'Ran the original eight-line arrow',code,output,now,2);
+      addAiMessage('Task 1 done! For Task 2, keep the same arrow output but use no more than two print() calls and put \\n inside the strings.');
+    } else addAiMessage('Task 1 should use the provided eight print() statements and match the original arrow exactly.');
+  } else if (currentTask === 2) {
+    if (output === ORIGINAL_ARROW && sim.calls.length <= 2 && /\\n/.test(code)) {
+      completeTask(2,'Reduced the arrow to two print() calls using newline escapes',code,output,now,2.5);
+      addAiMessage('Task 2 done! For Task 3, create two larger arrows side by side with at least 12 output lines and use * 2 to duplicate each row.');
+    } else if (output !== ORIGINAL_ARROW) addAiMessage('The output must still match the original eight-line arrow exactly.');
+    else addAiMessage('Good output. Now reduce the code to no more than two print() calls and use \\n inside the strings.');
+  } else if (currentTask === 3) {
+    var outputLines = output.split('\n');
+    var starCount = (output.match(/\*/g) || []).length;
+    var maxWidth = outputLines.reduce(function(max,line){return Math.max(max,line.length);},0);
+    if (/["']\s*\*\s*2/.test(code) && outputLines.length >= 12 && starCount >= 70 && maxWidth >= 30) {
+      completeTask(3,'Created two larger arrows using string multiplication',code,output,now,3);
+      addAiMessage('Task 3 done! For Task 4, remove one quote or parenthesis from a print() statement and Run to observe a SyntaxError.');
+    } else addAiMessage('Make the arrow larger to at least 12 output lines, duplicate rows with * 2, and keep enough spacing to show two arrows side by side.');
+  } else if (currentTask === 4) {
+    addAiMessage('Task 4 requires an error. Remove one quote or one parenthesis from a print() statement, then click Run.');
+  } else if (currentTask === 5) {
+    addAiMessage('Task 5 requires a NameError. Change lowercase print to uppercase Print on one line, then click Run.');
+  } else if (currentTask === 6) {
+    var allSingleQuoted = codeLines.length === 8 && codeLines.every(function(line){return /^print\s*\(\s*'/.test(line);});
+    if (output === ORIGINAL_ARROW && sim.calls.length === 8 && allSingleQuoted) {
+      completeTask(6,'Restored the original arrow using single quotes',code,output,now,2.5);
+      addAiMessage('Task 6 done! Lab 3 is complete — excellent experimentation. Download your report.');
+    } else if (output !== ORIGINAL_ARROW) addAiMessage('Restore the exact original eight-line arrow output first.');
+    else addAiMessage('The arrow is correct. Now use lowercase print and single quotes around every one of the eight strings.');
+  }
+}
+
+function completeTaskSilent(num) {
+  var tE=['','task1','task2','task3','task4','task5','task6'];
+  var sE=['','t1s','t2s','t3s','t4s','t5s','t6s'];
+  var pE=['','t1p','t2p','t3p','t4p','t5p','t6p'];
+  var pM=[0,2,2.5,3,2,1.5,2.5];
+  var el=document.getElementById(tE[num]); if(el) el.className='task-item done';
+  var sel=document.getElementById(sE[num]); if(sel) sel.textContent='\u2713';
+  var pel=document.getElementById(pE[num]); if(pel) pel.textContent=pM[num]+'/'+pM[num]+' pts';
+}
+
+function completeTask(num, desc, code, output, time, pts) {
+  var tE=['','task1','task2','task3','task4','task5','task6'];
+  var sE=['','t1s','t2s','t3s','t4s','t5s','t6s'];
+  var pE=['','t1p','t2p','t3p','t4p','t5p','t6p'];
+  var pM=[0,2,2.5,3,2,1.5,2.5];
+  document.getElementById(tE[num]).className='task-item done';
+  document.getElementById(sE[num]).textContent='\u2713';
+  document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
+  clearTutorAttempts(num);
+  taskLog.push({task:'Task '+num,desc:desc,code:code,output:output,time:time,pts:pts});
+  currentTask=num+1; updateScore();
+  viewedTask=currentTask>6?6:currentTask;
+  updateExpectedOutput();
+  saveEditorDraftLocally();
+  syncTaskNavigation();
+  queueProgressSave(Number(document.getElementById('scoreDisplay').textContent), currentTask > 6);
+  if (currentTask<=6) document.getElementById(tE[currentTask]).className='task-item active';
+  else {
+    document.getElementById('completeBanner').style.display='block';
+    document.getElementById('pdfBtn').style.display='inline-block';
+  }
+}
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent=savedPoints+taskLog.reduce(function(s,t){return s+t.pts;},0);
+}
+
+function generatePDF() {
+  var now = new Date();
+  var info = [
+    'Student: '+student.firstName+' '+student.lastName,
+    'Course: '+student.course+'   Section: '+student.section,
+    'Instructor: '+student.instructor,
+    'Date: '+now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'   Start: '+labStartTime.toLocaleTimeString(),
+    'Lab: 2.1.1.19 - Formatting the output',
+    'Final Grade: 13.5 / 13.5 points (100%)','',
+    'TASK BREAKDOWN',
+    'Task 1 - Run the original arrow ............................ 2/2 pts',
+    'Task 2 - Use fewer print() calls with newline escapes .... 2.5/2.5 pts',
+    'Task 3 - Make two larger arrows with string multiplication . 3/3 pts',
+    'Task 4 - Discover a SyntaxError ............................ 2/2 pts',
+    'Task 5 - Discover case sensitivity with Print ........... 1.5/1.5 pts',
+    'Task 6 - Restore the arrow using single quotes .......... 2.5/2.5 pts',''
+  ];
+  taskLog.forEach(function(t){
+    info.push('--- '+t.task+' | '+t.pts+' pts | '+t.time+' ---','Code:');
+    t.code.split('\n').slice(0,15).forEach(function(l){info.push('  '+l.substring(0,80));});
+    info.push('Output:');
+    (t.output||'(no output)').split('\n').slice(0,5).forEach(function(l){info.push('  '+l.substring(0,80));});
+    info.push('');
+  });
+  info.push('Generated: '+now.toLocaleString());
+  var sl=['BT','/F1 11 Tf','50 750 Td','14 TL','(Python Institute - Lab Report) Tj','0 -20 Td','/F1 9 Tf','12 TL'];
+  info.forEach(function(line){ sl.push('('+pdfSafe(line).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')+') Tj','T*'); });
+  sl.push('ET');
+  var stream=sl.join('\n'), pdf='%PDF-1.4\n', offsets=[];
+  offsets.push(pdf.length); pdf+='1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
+  offsets.push(pdf.length); pdf+='2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
+  offsets.push(pdf.length); pdf+='3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
+  offsets.push(pdf.length); pdf+='4 0 obj\n<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream\nendobj\n';
+  offsets.push(pdf.length); pdf+='5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n';
+  var xref=pdf.length;
+  pdf+='xref\n0 6\n0000000000 65535 f \n';
+  offsets.forEach(function(o){pdf+=String(o).padStart(10,'0')+' 00000 n \n';});
+  pdf+='trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+  var blob=new Blob([pdf],{type:'application/pdf'}), url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='Lab3_Report_'+fileSafe(student.lastName)+'_'+fileSafe(student.firstName)+'.pdf';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function pdfSafe(value) {
+  return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\u2013\u2014]/g,'-').replace(/[^\x20-\x7E]/g,'?');
+}
+
+function fileSafe(value) {
+  return pdfSafe(value).replace(/[^A-Za-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'') || 'Student';
+}
+
+var taskGuidance = {
+  1: 'Task 1 is active. Keep the provided eight print() statements unchanged and run them to produce the original arrow.',
+  2: 'Task 2 is active. Produce the same eight-line arrow with no more than two print() calls by inserting \\n inside the strings.',
+  3: 'Task 3 is active. Make two proportional, larger arrows side by side. Produce at least 12 output lines and use string multiplication with * 2.',
+  4: 'Task 4 is active. Remove one quotation mark or parenthesis from a print() statement and run it to produce a SyntaxError.',
+  5: 'Task 5 is active. Change lowercase print to uppercase Print on one line and run it to produce a NameError.',
+  6: 'Task 6 is active. Restore the original eight-line arrow with lowercase print and single quotes around every string.'
+};
+
+var taskHints = {
+  1: 'Hint: Reset the editor if the provided eight-line arrow was changed, then click Run.',
+  2: 'Hint: Put \\n between arrow rows inside a quoted string. One print() call can create several output lines.',
+  3: 'Hint: Build wider rows and repeat each quoted row with * 2. The finished output needs at least 12 lines.',
+  4: 'Hint: Delete only one closing quote or one closing parenthesis from a valid print() line.',
+  5: 'Hint: Python names are case-sensitive. Change only the first letter of print to uppercase.',
+  6: 'Hint: Restore eight lowercase print() calls and put each arrow row inside apostrophes instead of double quotes.'
+};
+
+function getTaskGuidance() {
+  return currentTask > 6 ? 'All six tasks are complete. You can download your report.' : taskGuidance[currentTask];
+}
+
+function isProgressQuestion(text) {
+  return /^(what('?s| is) next|next|what (do|should) i do( next)?|which task( is next)?|help me continue)[?.!]*$/i.test(text.trim());
+}
+
+function isSolutionRequest(text) {
+  var question = text.trim();
+  return /^(solution|answer|full code|correct code)[?.!]*$/i.test(question) ||
+    /\b(give|show|provide|tell|send)\b.*\b(solution|answer|full code|correct code|finished code)\b/i.test(question) ||
+    /\bwhat('?s| is) the (solution|answer|correct code)\b/i.test(question);
+}
+
+function getTaskSolution(taskNum) {
+  var solutions = {
+    1: STARTER_CODE,
+    2: FEWER_PRINT_CODE,
+    3: LARGE_DOUBLE_CODE,
+    4: 'Remove the final quote from a valid line, for example:\nprint("missing quote)',
+    5: 'Print("Arrow")',
+    6: SINGLE_QUOTE_CODE
+  };
+  return solutions[taskNum] || 'This task is already complete.';
+}
+
+function getSolutionUnlockedMessage(taskNum) {
+  return 'It looks like you are still stuck on Task ' + taskNum +
+    '. Here is the exact solution:\n' + getTaskSolution(taskNum);
+}
+
+function getSolutionWaitingMessage(taskNum) {
+  return 'Let\u2019s work through Task ' + taskNum + ' with another hint:\n' +
+    taskHints[taskNum];
+}
+
+function containsFullTaskSolution(reply, taskNum) {
+  var text = String(reply || '').replace(/\s+/g, ' ');
+  if (taskNum === 1) return (text.match(/print\s*\(/g) || []).length >= 8;
+  if (taskNum === 2) return text.indexOf('\\n') !== -1 && (text.match(/print\s*\(/g) || []).length <= 2;
+  if (taskNum === 3) return text.indexOf('* 2') !== -1 && (text.match(/print\s*\(/g) || []).length >= 8;
+  if (taskNum === 4) return /missing quote|missing parenthesis|unterminated/i.test(text);
+  if (taskNum === 5) return text.indexOf('Print(') !== -1;
+  if (taskNum === 6) return (text.match(/print\s*\(\s*'/g) || []).length >= 8;
+  return false;
+}
+
+function validateTutorReply(reply, taskNum) {
+  var text = String(reply || '');
+  if (taskNum <= 6 && getFailedAttempts(taskNum) < 5 &&
+      containsFullTaskSolution(text, taskNum)) {
+    return getSolutionWaitingMessage(taskNum);
+  }
+  return text;
+}
+
+async function sendMessage() {
+  var input=document.getElementById('aiInput'), text=input.value.trim();
+  if (!text) return; input.value='';
+  addUserMessage(text);
+  if (isProgressQuestion(text)) {
+    addAiMessage(getTaskGuidance());
+    return;
+  }
+  if (isSolutionRequest(text)) {
+    if (currentTask > 6) addAiMessage(getTaskGuidance());
+    else if (getFailedAttempts(currentTask) >= 5) addAiMessage(getSolutionUnlockedMessage(currentTask));
+    else addAiMessage(getSolutionWaitingMessage(currentTask));
+    return;
+  }
+  var tid=addTypingIndicator();
+  try {
+    var currentCode = document.getElementById('editor').value;
+    var complete = currentTask > 6;
+    var activeTask = complete ? null : currentTask;
+    var solutionUnlocked = !complete && getFailedAttempts(activeTask) >= 5;
+    var activeGuidance = getTaskGuidance();
+    var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPABASE_KEY,
+      'Authorization':'Bearer '+SUPABASE_KEY
+    },
+      body:JSON.stringify({
+        system:'You are a friendly Python tutor for beginners learning print() formatting, newline escapes, string multiplication, and basic errors. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. The application says the full solution is currently '+(solutionUnlocked?'available':'not available')+'. When it is not available, give a useful hint instead. Never mention attempt counts, thresholds, unlock rules, or promise that a solution will be provided later. If the lab is complete, never say a task is active.',
+        context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),labComplete:complete,solutionUnlocked:solutionUnlocked,taskInstructions:activeGuidance,code:currentCode},
+        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to a task as active.':'The active task is Task '+activeTask+'. Do not advance me to another task. Follow the application solution-availability state and never discuss its policy.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
+      })});
+    if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
+    var data=await res.json(); removeTypingIndicator(tid);
+    addAiMessage(validateTutorReply(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!", activeTask));
+  } catch(e) { removeTypingIndicator(tid); addAiMessage("Connection issue — the AI tutor is temporarily unavailable. The lab grading still works!"); }
+}
+
+function askChip(q){document.getElementById('aiInput').value=q;sendMessage();}
+function addUserMessage(t){appendMsg('user','You',t);}
+function addAiMessage(t){appendMsg('ai','AI',t);}
+function appendMsg(role,label,text){
+  var chat=document.getElementById('aiChat'),div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML='<div class="msg-avatar '+role+'">'+label+'</div><div class="msg-bubble">'+escHtml(text)+'</div>';
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+function addTypingIndicator(){
+  var id='ty'+Date.now(),chat=document.getElementById('aiChat'),div=document.createElement('div');
+  div.className='msg ai'; div.id=id;
+  div.innerHTML='<div class="msg-avatar ai">AI</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight; return id;
+}
+function removeTypingIndicator(id){var el=document.getElementById(id);if(el)el.remove();}
+window.addEventListener('beforeunload', saveEditorDraftLocally);
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') saveEditorDraftLocally();
+});
+updateLines();
+</script>
+</body>
+</html>
