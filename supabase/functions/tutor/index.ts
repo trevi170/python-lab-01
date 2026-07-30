@@ -42,7 +42,8 @@ export default {
       );
     }
 
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    const apiKey = Deno.env.get("ANTHROPIC_API_KEY") ??
+      Deno.env.get("Anthropic_API_KEY");
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: "Tutor service is not configured" }),
