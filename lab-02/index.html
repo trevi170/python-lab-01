@@ -287,11 +287,16 @@ async function loadSavedProgress() {
     });
     if (!progressRes.ok) throw new Error('Progress load failed (' + progressRes.status + ')');
     var rows = await progressRes.json();
-    if (!rows || !rows.length || taskLog.length > 0 || currentTask > 1) return;
+    if (taskLog.length > 0) return;
+    if (!rows || !rows.length) {
+      resetLabToScratch();
+      return;
+    }
+    if (currentTask > 1) return;
 
     var record = rows[0];
     var points = Math.max(0, Math.min(LAB_PTS, Number(record.points) || 0));
-    var doneCount = record.completed ? 5 : completedTaskCountForPoints(points);
+    var doneCount = record.completed ? 1 : completedTaskCountForPoints(points);
     if (!doneCount) return;
 
     savedPoints = points;
@@ -454,6 +459,39 @@ function resetCode() {
   document.getElementById('editor').value = 'print("Programming", "Essentials", "in")\nprint("Python")';
   updateLines();
   document.getElementById('consoleOutput').innerHTML = '<span class="sys">Code reset.</span>';
+}
+
+function resetLabToScratch() {
+  try { localStorage.removeItem(draftStorageKey()); }
+  catch(e) { console.warn('Could not clear the saved code draft:', e); }
+
+  savedPoints = 0;
+  taskLog = [];
+  currentTask = 1;
+  progressSaveErrorShown = false;
+
+  document.getElementById('task1').className = 'task-item active';
+  document.getElementById('t1s').textContent = '';
+  document.getElementById('t1p').textContent = '13.5 pts';
+
+  var banner = document.getElementById('completeBanner');
+  banner.style.display = 'none';
+  banner.style.borderColor = '#a6e3a1';
+  banner.style.color = '#a6e3a1';
+  banner.textContent = '\uD83C\uDF89 Lab complete! 13.5 / 13.5 points \u2014 Download your report above.';
+  document.getElementById('pdfBtn').style.display = 'none';
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Add sep and end to the first print() call, then click Run.';
+
+  var info = sessionStorage.getItem('lab_info');
+  if (info) {
+    try {
+      var data = JSON.parse(info);
+      data.completed = 'false';
+      sessionStorage.setItem('lab_info', JSON.stringify(data));
+    } catch(e) { console.warn('Could not reset the saved lab session:', e); }
+  }
+  resetCode();
 }
 
 function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }

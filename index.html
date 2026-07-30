@@ -309,7 +309,12 @@ async function loadSavedProgress() {
     });
     if (!progressRes.ok) throw new Error('Progress load failed (' + progressRes.status + ')');
     var rows = await progressRes.json();
-    if (!rows || !rows.length || taskLog.length > 0 || currentTask > 1) return;
+    if (taskLog.length > 0) return;
+    if (!rows || !rows.length) {
+      resetLabToScratch();
+      return;
+    }
+    if (currentTask > 1) return;
 
     var record = rows[0];
     var points = Math.max(0, Math.min(LAB_PTS, Number(record.points) || 0));
@@ -476,6 +481,45 @@ function resetCode() {
   document.getElementById('editor').value = '# Write your code below';
   updateLines();
   document.getElementById('consoleOutput').innerHTML = '<span class="sys">Code reset.</span>';
+}
+
+function resetLabToScratch() {
+  try { localStorage.removeItem(draftStorageKey()); }
+  catch(e) { console.warn('Could not clear the saved code draft:', e); }
+
+  savedPoints = 0;
+  taskLog = [];
+  currentTask = 1;
+  progressSaveErrorShown = false;
+
+  var taskIds = ['','task1','task2','task3','task4','task5'];
+  var statusIds = ['','t1s','t2s','t3s','t4s','t5s'];
+  var pointIds = ['','t1p','t2p','t3p','t4p','t5p'];
+  var pointValues = [0,3,3,2,2,4];
+  for (var i = 1; i <= 5; i++) {
+    document.getElementById(taskIds[i]).className = 'task-item ' + (i === 1 ? 'active' : 'locked');
+    document.getElementById(statusIds[i]).textContent = '';
+    document.getElementById(pointIds[i]).textContent = pointValues[i] + ' pts';
+  }
+
+  var banner = document.getElementById('completeBanner');
+  banner.style.display = 'none';
+  banner.style.borderColor = '#a6e3a1';
+  banner.style.color = '#a6e3a1';
+  banner.textContent = '\uD83C\uDF89 Lab complete! 14 / 14 points \u2014 Download your report above.';
+  document.getElementById('pdfBtn').style.display = 'none';
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 \u2014 type print("Hello, Python!") and click Run.';
+
+  var info = sessionStorage.getItem('lab_info');
+  if (info) {
+    try {
+      var data = JSON.parse(info);
+      data.completed = 'false';
+      sessionStorage.setItem('lab_info', JSON.stringify(data));
+    } catch(e) { console.warn('Could not reset the saved lab session:', e); }
+  }
+  resetCode();
 }
 
 function copyEditor() { navigator.clipboard.writeText(document.getElementById('editor').value); }
