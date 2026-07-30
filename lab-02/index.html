@@ -44,6 +44,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .task-pts { font-size: 11px; color: #6c7086; white-space: nowrap; padding-left: 8px; }
 .task-item.done .task-pts { color: #a6e3a1; font-weight: 700; }
 .complete-banner { display: none; background: #0d1f14; border: 1px solid #a6e3a1; border-radius: 8px; padding: 10px 14px; margin: 10px 0 4px; font-size: 13px; color: #a6e3a1; text-align: center; }
+.instruction-note { background: #1a2035; border: 1px solid #89b4fa66; border-radius: 6px; padding: 9px 11px; margin: 9px 0; color: #cdd6f4; font-size: 12px; line-height: 1.55; }
 .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .editor-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .editor-header { background: #1e2230; padding: 6px 12px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #2e3440; }
@@ -146,6 +147,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </ul>
     <h2>Scenario</h2>
     <p>Modify the first line of code using the <code>sep</code> and <code>end</code> keywords to match the expected output. Use both <code>print()</code> functions and do not change the second invocation.</p>
+    <div class="instruction-note"><strong>Two lines are required:</strong> Keep the first <code>print()</code> statement on line 1 and <code>print("Python")</code> on line 2. To create another line, click at the end of line 1, press <strong>Enter</strong> once, and type the second statement on the new line.</div>
     <h2>Expected output</h2>
     <p><code>Programming***Essentials***in...Python</code></p>
     <div class="complete-banner" id="completeBanner">&#127881; Lab complete! 13.5 / 13.5 points — Download your report above.</div>
