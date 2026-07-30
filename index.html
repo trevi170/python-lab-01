@@ -26,7 +26,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1d23; color: #
 .score-num { font-weight: 700; color: #a6e3a1; font-size: 14px; }
 .pdf-btn { background: #a6e3a1 !important; color: #1a1d23 !important; font-weight: 700 !important; display: none; }
 .main { display: flex; flex: 1; overflow: hidden; }
-.left-panel { width: 44%; border-right: 1px solid #2e3440; overflow-y: auto; padding: 20px 22px; flex-shrink: 0; }
+.left-panel { width: 44%; min-width: 280px; max-width: 70%; overflow-y: auto; padding: 20px 22px; flex-shrink: 0; }
 .left-panel h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin-bottom: 6px; margin-top: 16px; }
 .left-panel h2:first-child { margin-top: 0; }
 .left-panel p { color: #a6adc8; line-height: 1.6; margin-bottom: 8px; font-size: 13px; }
@@ -50,22 +50,31 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .instruction-note { background: #1a2035; border: 1px solid #89b4fa66; border-radius: 6px; padding: 9px 11px; margin: 9px 0; color: #cdd6f4; font-size: 12px; line-height: 1.55; }
 .expected-output-box { background: #181b21; border: 1px solid #3d4455; border-radius: 6px; padding: 9px 11px; margin-bottom: 10px; }
 .expected-output-box code { display: block; background: transparent; padding: 0; color: #a6e3a1; white-space: pre-wrap; line-height: 1.5; }
-.right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .editor-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .editor-header { background: #1e2230; padding: 6px 12px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #2e3440; }
 .editor-body { display: flex; flex: 1; overflow: hidden; }
 .line-nums { background: #181b21; padding: 10px; color: #4a4f68; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; text-align: right; user-select: none; min-width: 36px; border-right: 1px solid #2e3440; }
 #editor { flex: 1; background: #1e2230; color: #cdd6f4; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; padding: 10px 14px; border: none; outline: none; resize: none; tab-size: 4; }
-.console-area { border-top: 1px solid #2e3440; flex-shrink: 0; }
+.panel-resizer { flex-shrink: 0; position: relative; z-index: 5; background: #2e3440; touch-action: none; transition: background 0.15s ease; }
+.vertical-resizer { width: 7px; cursor: col-resize; }
+.horizontal-resizer { height: 7px; cursor: row-resize; }
+.panel-resizer::after { content: ""; position: absolute; border-radius: 3px; background: #6c7086; }
+.vertical-resizer::after { width: 2px; height: 38px; left: 2px; top: 50%; transform: translateY(-50%); }
+.horizontal-resizer::after { width: 38px; height: 2px; left: 50%; top: 2px; transform: translateX(-50%); }
+.panel-resizer:hover, .panel-resizer:focus, .panel-resizer.dragging { background: #89b4fa; outline: none; }
+body.resizing-column { cursor: col-resize; user-select: none; }
+body.resizing-row { cursor: row-resize; user-select: none; }
+.console-area { flex-shrink: 0; height: 120px; min-height: 70px; max-height: 45%; display: flex; flex-direction: column; }
 .console-header { background: #181b21; padding: 6px 12px; font-size: 12px; color: #6c7086; }
-.console-output { background: #181b21; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 13px; min-height: 70px; max-height: 100px; overflow-y: auto; white-space: pre-wrap; }
+.console-output { background: #181b21; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 13px; flex: 1; min-height: 0; overflow-y: auto; white-space: pre-wrap; }
 .err { color: #f38ba8; } .sys { color: #6c7086; } .ok { color: #a6e3a1; }
-.ai-panel { border-top: 2px solid #89b4fa; display: flex; flex-direction: column; flex-shrink: 0; }
+.ai-panel { display: flex; flex-direction: column; flex-shrink: 0; height: 190px; min-height: 115px; max-height: 55%; overflow: hidden; }
 .ai-header { background: #181b21; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2e3440; }
 .ai-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #89b4fa; }
 .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #a6e3a1; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
-.ai-chat { max-height: 110px; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #1a1d23; }
+.ai-chat { flex: 1; min-height: 45px; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; background: #1a1d23; }
 .msg { display: flex; gap: 8px; align-items: flex-start; }
 .msg-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
 .msg-avatar.ai { background: #89b4fa; color: #1a1d23; }
@@ -94,10 +103,13 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
   .topbar-nav { order: 3; width: 100%; justify-content: center; }
   .progress-bars { gap: 12px; flex-wrap: wrap; }
   .main { display: block; overflow: visible; }
-  .left-panel { width: 100%; border-right: 0; border-bottom: 1px solid #2e3440; padding: 16px; }
+  .left-panel { width: 100% !important; min-width: 0; max-width: none; border-right: 0; border-bottom: 1px solid #2e3440; padding: 16px; }
+  .panel-resizer { display: none; }
   .right-panel { min-height: 720px; overflow: visible; }
   .editor-area { min-height: 300px; }
-  .ai-chat { max-height: 180px; }
+  .console-area, .ai-panel { height: auto !important; max-height: none; }
+  .console-output { min-height: 100px; max-height: 180px; }
+  .ai-chat { flex: none; min-height: 100px; max-height: 180px; }
   .hint-chips { overflow-x: auto; flex-wrap: nowrap; }
 }
 
@@ -204,6 +216,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
     </div>
   </div>
 
+  <div class="panel-resizer vertical-resizer" id="mainResizer" role="separator" aria-orientation="vertical" aria-label="Resize instructions and code editor" tabindex="0" title="Drag to resize the instructions. Double-click to reset."></div>
   <div class="right-panel">
     <div class="editor-area">
       <div class="editor-header">main.py</div>
@@ -212,10 +225,12 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
         <textarea id="editor" spellcheck="false" oninput="updateLines()" onkeydown="handleTab(event)"># Write your code below</textarea>
       </div>
     </div>
+    <div class="panel-resizer horizontal-resizer" id="consoleResizer" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabindex="0" title="Drag to resize the console. Double-click to reset."></div>
     <div class="console-area">
       <div class="console-header">Console</div>
       <div class="console-output" id="consoleOutput"><span class="sys">Ready. Click Run to execute your code.</span></div>
     </div>
+    <div class="panel-resizer horizontal-resizer" id="chatResizer" role="separator" aria-orientation="horizontal" aria-label="Resize AI Tutor" tabindex="0" title="Drag to resize the AI Tutor. Double-click to reset."></div>
     <div class="ai-panel">
       <div class="ai-header">
         <div class="ai-title"><div class="ai-dot"></div>AI Tutor</div>
@@ -936,10 +951,167 @@ function addTypingIndicator(){
   chat.appendChild(div); chat.scrollTop=chat.scrollHeight; return id;
 }
 function removeTypingIndicator(id){var el=document.getElementById(id);if(el)el.remove();}
+
+var WORKSPACE_LAYOUT_KEY = 'python_lab_workspace_layout_v1';
+var WORKSPACE_DEFAULTS = {leftPercent:44, consoleHeight:120, chatHeight:190};
+
+function clampWorkspaceValue(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getWorkspaceElements() {
+  return {
+    main: document.querySelector('.main'),
+    left: document.querySelector('.left-panel'),
+    right: document.querySelector('.right-panel'),
+    consolePanel: document.querySelector('.console-area'),
+    chatPanel: document.querySelector('.ai-panel'),
+    mainHandle: document.getElementById('mainResizer'),
+    consoleHandle: document.getElementById('consoleResizer'),
+    chatHandle: document.getElementById('chatResizer')
+  };
+}
+
+function readWorkspaceLayout() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY) || '{}');
+    return {
+      leftPercent: Number(saved.leftPercent) || WORKSPACE_DEFAULTS.leftPercent,
+      consoleHeight: Number(saved.consoleHeight) || WORKSPACE_DEFAULTS.consoleHeight,
+      chatHeight: Number(saved.chatHeight) || WORKSPACE_DEFAULTS.chatHeight
+    };
+  } catch (error) {
+    return Object.assign({}, WORKSPACE_DEFAULTS);
+  }
+}
+
+function saveWorkspaceLayout() {
+  if (window.innerWidth <= 800) return;
+  var parts = getWorkspaceElements();
+  var leftPercent = parts.main.clientWidth
+    ? parts.left.getBoundingClientRect().width / parts.main.clientWidth * 100
+    : WORKSPACE_DEFAULTS.leftPercent;
+  try {
+    localStorage.setItem(WORKSPACE_LAYOUT_KEY, JSON.stringify({
+      leftPercent: Math.round(leftPercent * 10) / 10,
+      consoleHeight: Math.round(parts.consolePanel.getBoundingClientRect().height),
+      chatHeight: Math.round(parts.chatPanel.getBoundingClientRect().height)
+    }));
+  } catch (error) {}
+}
+
+function setLeftPanelPercent(percent) {
+  var parts = getWorkspaceElements();
+  if (!parts.main.clientWidth) return;
+  var maxPercent = Math.min(70, (parts.main.clientWidth - 340) / parts.main.clientWidth * 100);
+  var value = clampWorkspaceValue(percent, 25, Math.max(25, maxPercent));
+  parts.left.style.width = value + '%';
+  parts.mainHandle.setAttribute('aria-valuenow', Math.round(value));
+  parts.mainHandle.setAttribute('aria-valuetext', Math.round(value) + '% instructions width');
+}
+
+function setLowerPanelHeight(panelName, height) {
+  var parts = getWorkspaceElements();
+  var panel = panelName === 'console' ? parts.consolePanel : parts.chatPanel;
+  var other = panelName === 'console' ? parts.chatPanel : parts.consolePanel;
+  var minHeight = panelName === 'console' ? 70 : 115;
+  var available = parts.right.clientHeight - other.getBoundingClientRect().height - 170;
+  var value = clampWorkspaceValue(height, minHeight, Math.max(minHeight, available));
+  panel.style.height = value + 'px';
+  var handle = panelName === 'console' ? parts.consoleHandle : parts.chatHandle;
+  handle.setAttribute('aria-valuenow', Math.round(value));
+  handle.setAttribute('aria-valuetext', Math.round(value) + ' pixels high');
+}
+
+function applyWorkspaceLayout() {
+  if (window.innerWidth <= 800) return;
+  var saved = readWorkspaceLayout();
+  setLeftPanelPercent(saved.leftPercent);
+  setLowerPanelHeight('chat', saved.chatHeight);
+  setLowerPanelHeight('console', saved.consoleHeight);
+}
+
+function beginWorkspaceResize(event, type) {
+  if (window.innerWidth <= 800 || event.button !== 0) return;
+  event.preventDefault();
+  var parts = getWorkspaceElements();
+  var handle = type === 'main' ? parts.mainHandle : (type === 'console' ? parts.consoleHandle : parts.chatHandle);
+  var startX = event.clientX;
+  var startY = event.clientY;
+  var startLeft = parts.left.getBoundingClientRect().width;
+  var panel = type === 'console' ? parts.consolePanel : parts.chatPanel;
+  var startHeight = type === 'main' ? 0 : panel.getBoundingClientRect().height;
+  handle.classList.add('dragging');
+  document.body.classList.add(type === 'main' ? 'resizing-column' : 'resizing-row');
+
+  function move(pointerEvent) {
+    if (type === 'main') {
+      setLeftPanelPercent((startLeft + pointerEvent.clientX - startX) / parts.main.clientWidth * 100);
+    } else {
+      setLowerPanelHeight(type, startHeight + startY - pointerEvent.clientY);
+    }
+  }
+
+  function stop() {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', stop);
+    window.removeEventListener('pointercancel', stop);
+    handle.classList.remove('dragging');
+    document.body.classList.remove('resizing-column', 'resizing-row');
+    saveWorkspaceLayout();
+  }
+
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', stop);
+  window.addEventListener('pointercancel', stop);
+}
+
+function resetWorkspacePanel(type) {
+  if (type === 'main') setLeftPanelPercent(WORKSPACE_DEFAULTS.leftPercent);
+  else setLowerPanelHeight(type, WORKSPACE_DEFAULTS[type + 'Height']);
+  saveWorkspaceLayout();
+}
+
+function handleWorkspaceKeyboard(event, type) {
+  var parts = getWorkspaceElements();
+  var handled = true;
+  if (type === 'main' && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+    var currentPercent = parts.left.getBoundingClientRect().width / parts.main.clientWidth * 100;
+    setLeftPanelPercent(currentPercent + (event.key === 'ArrowRight' ? 2 : -2));
+  } else if (type !== 'main' && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+    var panel = type === 'console' ? parts.consolePanel : parts.chatPanel;
+    setLowerPanelHeight(type, panel.getBoundingClientRect().height + (event.key === 'ArrowUp' ? 12 : -12));
+  } else if (event.key === 'Home') {
+    resetWorkspacePanel(type);
+  } else {
+    handled = false;
+  }
+  if (handled) {
+    event.preventDefault();
+    saveWorkspaceLayout();
+  }
+}
+
+function initWorkspaceResizers() {
+  var parts = getWorkspaceElements();
+  [
+    {handle:parts.mainHandle, type:'main'},
+    {handle:parts.consoleHandle, type:'console'},
+    {handle:parts.chatHandle, type:'chat'}
+  ].forEach(function(item) {
+    item.handle.addEventListener('pointerdown', function(event) { beginWorkspaceResize(event, item.type); });
+    item.handle.addEventListener('dblclick', function() { resetWorkspacePanel(item.type); });
+    item.handle.addEventListener('keydown', function(event) { handleWorkspaceKeyboard(event, item.type); });
+  });
+  applyWorkspaceLayout();
+  window.addEventListener('resize', applyWorkspaceLayout);
+}
+
 window.addEventListener('beforeunload', saveEditorDraftLocally);
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'hidden') saveEditorDraftLocally();
 });
+initWorkspaceResizers();
 updateLines();
 </script>
 </body>
