@@ -67,7 +67,7 @@ code { background: #2e3440; color: #cba6f7; padding: 1px 5px; border-radius: 3px
 .msg-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
 .msg-avatar.ai { background: #89b4fa; color: #1a1d23; }
 .msg-avatar.user { background: #cba6f7; color: #1a1d23; }
-.msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; }
+.msg-bubble { background: #2e3440; padding: 6px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #cdd6f4; max-width: 90%; white-space: pre-wrap; }
 .msg.user { flex-direction: row-reverse; }
 .msg.user .msg-bubble { background: #313552; }
 .hint-chips { display: flex; gap: 6px; padding: 5px 12px; flex-wrap: wrap; background: #181b21; border-top: 1px solid #2e3440; }
@@ -694,15 +694,50 @@ function fileSafe(value) {
 }
 
 var taskGuidance = {
-  1: 'Task 1 is active. Modify only the first print() call. Use sep to place three asterisks between the words and end to place three dots before the unchanged print("Python") call. Do not provide the full finished code unless the student explicitly asks for the solution.'
+  1: 'Task 1 is active. Modify only the first print() call. Use sep to place three asterisks between the words and end="..." to place three dots immediately before the unchanged print("Python") call on the same output line. Never put \\n in the end value. Do not provide the full finished code unless the student explicitly asks for the solution.'
 };
 
+function isLabComplete() {
+  var taskElement = document.getElementById('task1');
+  var score = Number(document.getElementById('scoreDisplay').textContent) || 0;
+  return currentTask > 1 ||
+    Boolean(taskElement && taskElement.classList.contains('done')) ||
+    score >= LAB_PTS;
+}
+
 function getTaskGuidance() {
-  return currentTask > 1 ? 'Lab 2 is complete. You can download your report.' : taskGuidance[currentTask];
+  return isLabComplete()
+    ? 'Lab 2 is complete. There is no next task in this lab. Download the report or select Portal to choose another lab.'
+    : taskGuidance[1];
 }
 
 function isProgressQuestion(text) {
   return /^(what('?s| is) next|next|what (do|should) i do( next)?|which task( is next)?|help me continue)[?.!]*$/i.test(text.trim());
+}
+
+function isSolutionRequest(text) {
+  var question = text.trim();
+  return /^(solution|answer|full code|correct code)[?.!]*$/i.test(question) ||
+    /\b(give|show|provide|tell|send)\b.*\b(solution|answer|full code|correct code|finished code)\b/i.test(question) ||
+    /\bwhat('?s| is) the (solution|answer|correct code)\b/i.test(question);
+}
+
+function getExactSolution() {
+  return 'Use these exact two lines:\n' +
+    'print("Programming", "Essentials", "in", sep="***", end="...")\n' +
+    'print("Python")\n' +
+    'Keep end="..." exactly as shown. Do not add \\n because Python must stay on the same output line.';
+}
+
+function validateTutorReply(reply) {
+  var text = String(reply || '');
+  if (/end\s*=\s*(['"])[^'"]*\\n[^'"]*\1/i.test(text)) {
+    return getExactSolution();
+  }
+  if (isLabComplete() && /\bTask\s*1\s+(is|remains|is still)\s+active\b/i.test(text)) {
+    return getTaskGuidance();
+  }
+  return text;
 }
 
 async function sendMessage() {
@@ -713,10 +748,15 @@ async function sendMessage() {
     addAiMessage(getTaskGuidance());
     return;
   }
+  if (isSolutionRequest(text)) {
+    addAiMessage(isLabComplete() ? getTaskGuidance() + '\n\n' + getExactSolution() : getExactSolution());
+    return;
+  }
   var tid=addTypingIndicator();
   try {
     var currentCode = document.getElementById('editor').value;
-    var activeTask = Math.min(currentTask,1);
+    var complete = isLabComplete();
+    var activeTask = complete ? null : 1;
     var activeGuidance = getTaskGuidance();
     var res=await fetch(SUPABASE_URL+'/functions/v1/tutor',{method:'POST',headers:{
       'Content-Type':'application/json',
@@ -724,13 +764,13 @@ async function sendMessage() {
       'Authorization':'Bearer '+SUPABASE_KEY
     },
       body:JSON.stringify({
-        system:'You are a friendly Python tutor for beginners working on sep and end in print(). Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. ACTIVE TASK: '+activeGuidance+' Treat this as authoritative. Guide with small hints before revealing code.',
-        context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),taskInstructions:activeGuidance,code:currentCode},
-        messages:[{role:'user',content:'The active task is Task '+activeTask+'. Do not advance me to another task.\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
+        system:'You are a friendly Python tutor for beginners working on sep and end in print(). Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' The only correct final output is Programming***Essentials***in...Python on one line. The correct end value is exactly "..."; never recommend a newline or \\\\n in end. The second line must remain exactly print("Python"). If the lab state says complete, never say a task is active or that more work remains. Guide with small hints before revealing code.',
+        context:{activeTask:activeTask,completedTasks:complete?1:0,labComplete:complete,expectedOutput:'Programming***Essentials***in...Python',requiredEnd:'...',forbiddenEnd:'...\\\\n',taskInstructions:activeGuidance,code:currentCode},
+        messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to Task 1 as active.':'The active task is Task 1. Do not advance me to another task.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
       })});
     if (!res.ok) throw new Error('Tutor request failed ('+res.status+')');
     var data=await res.json(); removeTypingIndicator(tid);
-    addAiMessage(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!");
+    addAiMessage(validateTutorReply(data.content&&data.content[0]?data.content[0].text:"I'm having trouble connecting. Try again!"));
   } catch(e) { removeTypingIndicator(tid); addAiMessage("Connection issue — the AI tutor is temporarily unavailable. The lab grading still works!"); }
 }
 
