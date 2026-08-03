@@ -166,7 +166,7 @@ body.resizing-row { cursor: row-resize; user-select: none; }
     </ul>
     <h2>Scenario</h2>
     <p>Miles and kilometers are units of length or distance. Bearing in mind that 1 mile is equal to approximately 1.61 kilometers, complete the program in the editor so that it converts miles to kilometers and kilometers to miles.</p>
-    <div class="instruction-note"><strong>Use the <code>###</code> placeholders:</strong> Do not change the rest of the code. Replace each placeholder with the correct variable name or expression so the program prints both conversions.</div>
+    <div class="instruction-note"><strong>Work one task at a time:</strong> Add each new line under the matching TODO comment. When a task asks for another line, click at the end of the previous line, press Enter once, and type the new statement on the next line.</div>
     <h2>Expected output or result</h2>
     <div class="expected-output-box"><code id="expectedOutput">7.38 miles is 11.88 kilometers
 12.25 kilometers is 7.61 miles</code></div>
@@ -175,10 +175,42 @@ body.resizing-row { cursor: row-resize; user-select: none; }
     <div class="task-item active" id="task1">
       <div class="task-status" id="t1s"></div>
       <div class="task-label">
-        <div class="task-summary"><strong>Task 1</strong> — Complete the simple converter</div>
-        <div class="task-instruction"><strong>What to do:</strong> Replace each <code>###</code> placeholder with the correct variable name or expression so the program prints both conversions exactly as shown in the expected output.</div>
+        <div class="task-summary"><strong>Task 1</strong> — Create the miles-to-kilometers conversion</div>
+        <div class="task-instruction"><strong>What to do:</strong> On a new line below the first TODO, create <code>miles_to_kilometers</code> and set it equal to <code>miles * 1.61</code>.</div>
       </div>
-      <div class="task-pts" id="t1p">13.5 pts</div>
+      <div class="task-pts" id="t1p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task2">
+      <div class="task-status" id="t2s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 2</strong> — Create the kilometers-to-miles conversion</div>
+        <div class="task-instruction"><strong>What to do:</strong> On a new line below the second TODO, create <code>kilometers_to_miles</code> and set it equal to <code>kilometers / 1.61</code>.</div>
+      </div>
+      <div class="task-pts" id="t2p">3 pts</div>
+    </div>
+    <div class="task-item locked" id="task3">
+      <div class="task-status" id="t3s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 3</strong> — Print the miles conversion</div>
+        <div class="task-instruction"><strong>What to do:</strong> On a new line, print <code>miles</code>, the text <code>miles is</code>, <code>round(miles_to_kilometers, 2)</code>, and the text <code>kilometers</code>.</div>
+      </div>
+      <div class="task-pts" id="t3p">2.5 pts</div>
+    </div>
+    <div class="task-item locked" id="task4">
+      <div class="task-status" id="t4s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 4</strong> — Print the kilometers conversion</div>
+        <div class="task-instruction"><strong>What to do:</strong> On the next line, print <code>kilometers</code>, the text <code>kilometers is</code>, <code>round(kilometers_to_miles, 2)</code>, and the text <code>miles</code>.</div>
+      </div>
+      <div class="task-pts" id="t4p">2.5 pts</div>
+    </div>
+    <div class="task-item locked" id="task5">
+      <div class="task-status" id="t5s"></div>
+      <div class="task-label">
+        <div class="task-summary"><strong>Task 5</strong> — Run the full converter</div>
+        <div class="task-instruction"><strong>What to do:</strong> Run the completed program with no errors and produce both conversion lines exactly like the expected output.</div>
+      </div>
+      <div class="task-pts" id="t5p">2.5 pts</div>
     </div>
     <div style="height:48px;"></div>
     <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
@@ -196,11 +228,13 @@ body.resizing-row { cursor: row-resize; user-select: none; }
         <textarea id="editor" spellcheck="false" oninput="updateLines()" onkeydown="handleTab(event)">kilometers = 12.25
 miles = 7.38
 
-miles_to_kilometers = ### * 1.61
-kilometers_to_miles = ### / 1.61
+# TODO: Convert miles to kilometers
 
-print(miles, "miles is", round(###, 2), "kilometers")
-print(kilometers, "kilometers is", round(###, 2), "miles")</textarea>
+# TODO: Convert kilometers to miles
+
+# TODO: Print the miles conversion
+
+# TODO: Print the kilometers conversion</textarea>
       </div>
     </div>
     <div class="panel-resizer horizontal-resizer" id="consoleResizer" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabindex="0" title="Drag to resize the console. Double-click to reset."></div>
@@ -221,7 +255,7 @@ print(kilometers, "kilometers is", round(###, 2), "miles")</textarea>
         </div>
       </div>
       <div class="hint-chips">
-        <div class="chip" onclick="askChip('How do I replace the ### placeholders?')">Placeholders</div>
+        <div class="chip" onclick="askChip('How do I create the conversion variables?')">Variables</div>
         <div class="chip" onclick="askChip('How do I calculate miles to kilometers?')">Miles to km</div>
         <div class="chip" onclick="askChip('How do I calculate kilometers to miles?')">Km to miles</div>
         <div class="chip" onclick="askChip('How does round() work here?')">round()</div>
@@ -239,7 +273,7 @@ var SUPABASE_URL = 'https://otseertzdwjrfkrdzutu.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90c2VlcnR6ZHdqcmZrcmR6dXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODYzNTYsImV4cCI6MjEwMDU2MjM1Nn0.Wp9xkgiyEjWSgChSL6j20V7YtUxadq9H8UPpm2ip6RM';
 var LAB_NUM = 6;
 var LAB_PTS = 13.5;
-var TOTAL_TASKS = 1;
+var TOTAL_TASKS = 5;
 
 var student = {};
 var labStartTime = new Date();
@@ -299,7 +333,7 @@ function initLab() {
     document.getElementById('scoreDisplay').textContent = String(LAB_PTS);
     document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! You already completed this lab. You can review or download your report.';
   } else {
-  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 — complete the simple converter.';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 - create the miles-to-kilometers conversion.';
   }
 
   restoreEditorDraft();
@@ -315,13 +349,21 @@ initLab();
 loadSavedProgress();
 
 function completedTaskCountForPoints(points) {
-  if (points >= 13.5) return TOTAL_TASKS;
+  if (points >= 13.5) return 5;
+  if (points >= 11) return 4;
+  if (points >= 8.5) return 3;
+  if (points >= 6) return 2;
+  if (points >= 3) return 1;
   return 0;
 }
 
 function updateExpectedOutput() {
   var expected = {
-    1: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles'
+    1: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
+    2: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
+    3: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
+    4: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
+    5: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles'
   };
   document.getElementById('expectedOutput').textContent =
     currentTask > TOTAL_TASKS ? 'Lab complete — 13.5 / 13.5 points' : expected[currentTask];
@@ -576,9 +618,13 @@ function handleTab(e) {
 }
 
 var FINAL_OUTPUT = '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles';
-var STARTER_CODE = 'kilometers = 12.25\nmiles = 7.38\n\nmiles_to_kilometers = ### * 1.61\nkilometers_to_miles = ### / 1.61\n\nprint(miles, "miles is", round(###, 2), "kilometers")\nprint(kilometers, "kilometers is", round(###, 2), "miles")';
+var STARTER_CODE = 'kilometers = 12.25\nmiles = 7.38\n\n# TODO: Convert miles to kilometers\n\n# TODO: Convert kilometers to miles\n\n# TODO: Print the miles conversion\n\n# TODO: Print the kilometers conversion';
 var TASK_SOLUTIONS = {
-  1: 'miles_to_kilometers = miles * 1.61\nkilometers_to_miles = kilometers / 1.61\n\nprint(miles, "miles is", round(miles_to_kilometers, 2), "kilometers")\nprint(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles")'
+  1: 'miles_to_kilometers = miles * 1.61',
+  2: 'kilometers_to_miles = kilometers / 1.61',
+  3: 'print(miles, "miles is", round(miles_to_kilometers, 2), "kilometers")',
+  4: 'print(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles")',
+  5: 'miles_to_kilometers = miles * 1.61\nkilometers_to_miles = kilometers / 1.61\nprint(miles, "miles is", round(miles_to_kilometers, 2), "kilometers")\nprint(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles")'
 };
 
 function resetCode() {
@@ -596,10 +642,10 @@ function resetLabToScratch() {
   currentTask = 1;
   viewedTask = 1;
   progressSaveErrorShown = false;
-  var taskIds = ['','task1'];
-  var statusIds = ['','t1s'];
-  var pointIds = ['','t1p'];
-  var pointValues = [0,13.5];
+  var taskIds = ['','task1','task2','task3','task4','task5'];
+  var statusIds = ['','t1s','t2s','t3s','t4s','t5s'];
+  var pointIds = ['','t1p','t2p','t3p','t4p','t5p'];
+  var pointValues = [0,3,3,2.5,2.5,2.5];
   for (var i = 1; i <= TOTAL_TASKS; i++) {
     document.getElementById(taskIds[i]).className = 'task-item ' + (i === 1 ? 'active' : 'locked');
     document.getElementById(statusIds[i]).textContent = '';
@@ -612,7 +658,7 @@ function resetLabToScratch() {
   banner.textContent = '\uD83C\uDF89 Lab complete! 13.5 / 13.5 points \u2014 Download your report above.';
   document.getElementById('pdfBtn').style.display = 'none';
   document.getElementById('scoreDisplay').textContent = '0';
-  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 \u2014 complete the simple converter.';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 - create the miles-to-kilometers conversion.';
   var info = sessionStorage.getItem('lab_info');
   if (info) {
     try {
@@ -638,7 +684,7 @@ function decodePythonString(raw) {
     .replace(/\\'/g, "'");
 }
 function splitTopLevelCommas(text) {
-  var parts = [], current = '', inQuote = false, quoteChar = '', escaped = false;
+  var parts = [], current = '', inQuote = false, quoteChar = '', escaped = false, depth = 0;
   for (var i = 0; i < text.length; i++) {
     var ch = text.charAt(i);
     if (escaped) { current += ch; escaped = false; continue; }
@@ -649,7 +695,9 @@ function splitTopLevelCommas(text) {
       continue;
     }
     if (ch === '"' || ch === "'") { inQuote = true; quoteChar = ch; current += ch; continue; }
-    if (ch === ',') { parts.push(current.trim()); current = ''; continue; }
+    if (ch === '(') { depth++; current += ch; continue; }
+    if (ch === ')') { depth = Math.max(0, depth - 1); current += ch; continue; }
+    if (ch === ',' && depth === 0) { parts.push(current.trim()); current = ''; continue; }
     current += ch;
   }
   if (current.trim()) parts.push(current.trim());
@@ -667,6 +715,18 @@ function evalSimpleExpression(expr, vars) {
     return vars[text];
   }
   if (/^-?\d+(?:\.\d+)?$/.test(text)) return Number(text);
+  var roundMatch = text.match(/^round\s*\(\s*(.+)\s*,\s*(\d+)\s*\)$/);
+  if (roundMatch) {
+    var roundedValue = Number(evalSimpleExpression(roundMatch[1], vars));
+    var digits = Number(roundMatch[2]);
+    return Number(roundedValue.toFixed(digits));
+  }
+  var multMatch = text.match(/^([A-Za-z_][A-Za-z0-9_]*|-?\d+(?:\.\d+)?)\s*\*\s*([A-Za-z_][A-Za-z0-9_]*|-?\d+(?:\.\d+)?)$/);
+  if (multMatch) {
+    var leftMult = evalSimpleExpression(multMatch[1], vars);
+    var rightMult = evalSimpleExpression(multMatch[2], vars);
+    return Number(leftMult) * Number(rightMult);
+  }
   var divMatch = text.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*\/\s*([A-Za-z_][A-Za-z0-9_]*|-?\d+(?:\.\d+)?)$/);
   if (divMatch) {
     var left = evalSimpleExpression(divMatch[1], vars);
@@ -753,39 +813,63 @@ function runCode() {
   }
 }
 function gradeError(error) {
-  addAiMessage('Python reported a ' + error.type + '. Keep the current task on one physical code line and check every quote, backslash, and parenthesis.');
+  addAiMessage('Python reported a ' + error.type + '. Check the active task, then look closely at spelling, quotes, commas, and parentheses.');
 }
 function gradeSuccess(code, sim, now) {
-  var codeLines = code.split('\n').map(function(line){return line.trim();}).filter(function(line){return line && line.charAt(0) !== '#';});
   var output = sim.text.replace(/\n$/, '');
-  var oneLineOneCall = codeLines.length === 1 && sim.calls.length === 1;
   if (currentTask === 1) {
-    if (/miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(code) &&
-        /kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(code) &&
-        /print\s*\(\s*miles\s*,\s*["']miles is["']\s*,\s*round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)\s*,\s*["']kilometers["']\s*\)/.test(code) &&
-        /print\s*\(\s*kilometers\s*,\s*["']kilometers is["']\s*,\s*round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)\s*,\s*["']miles["']\s*\)/.test(code) &&
-        output === '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles') {
-      completeTask(1,'Built the miles/kilometers converter',code,output,now,13.5);
-      addAiMessage('Task 1 done! This lab is complete — great work with variables, arithmetic, and round().');
+    if (/miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(code)) {
+      completeTask(1,'Created miles_to_kilometers',code,output,now,3);
+      addAiMessage('Task 1 done! Now create kilometers_to_miles by dividing kilometers by 1.61.');
     } else {
-      addAiMessage('Fill in each ### placeholder with the matching variable name or expression, then run the code again.');
+      addAiMessage('Create miles_to_kilometers with miles * 1.61, then run the code again.');
+    }
+  } else if (currentTask === 2) {
+    if (/kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(code)) {
+      completeTask(2,'Created kilometers_to_miles',code,output,now,3);
+      addAiMessage('Task 2 done! Now add the first print() statement for the miles conversion.');
+    } else {
+      addAiMessage('Create kilometers_to_miles with kilometers / 1.61, then run the code again.');
+    }
+  } else if (currentTask === 3) {
+    if (/print\s*\(\s*miles\s*,\s*["']miles is["']\s*,\s*round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)\s*,\s*["']kilometers["']\s*\)/.test(code) &&
+        output.indexOf('7.38 miles is 11.88 kilometers') !== -1) {
+      completeTask(3,'Printed the miles conversion',code,output,now,2.5);
+      addAiMessage('Task 3 done! Now add the second print() statement for the kilometers conversion on the next line.');
+    } else {
+      addAiMessage('Add the print() statement for miles using round(miles_to_kilometers, 2).');
+    }
+  } else if (currentTask === 4) {
+    if (/print\s*\(\s*kilometers\s*,\s*["']kilometers is["']\s*,\s*round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)\s*,\s*["']miles["']\s*\)/.test(code) &&
+        output.indexOf('12.25 kilometers is 7.61 miles') !== -1) {
+      completeTask(4,'Printed the kilometers conversion',code,output,now,2.5);
+      addAiMessage('Task 4 done! Run the completed converter once more to finish the lab.');
+    } else {
+      addAiMessage('Add the print() statement for kilometers using round(kilometers_to_miles, 2).');
+    }
+  } else if (currentTask === 5) {
+    if (output === FINAL_OUTPUT) {
+      completeTask(5,'Ran the full converter successfully',code,output,now,2.5);
+      addAiMessage('Task 5 done! This lab is complete - great work with variables and conversions.');
+    } else {
+      addAiMessage('Run the completed program again and make sure both output lines match the expected output exactly.');
     }
   }
 }
 function completeTaskSilent(num) {
-  var tE=['','task1'];
-  var sE=['','t1s'];
-  var pE=['','t1p'];
-  var pM=[0,13.5];
+  var tE=['','task1','task2','task3','task4','task5'];
+  var sE=['','t1s','t2s','t3s','t4s','t5s'];
+  var pE=['','t1p','t2p','t3p','t4p','t5p'];
+  var pM=[0,3,3,2.5,2.5,2.5];
   var el=document.getElementById(tE[num]); if(el) el.className='task-item done';
   var sel=document.getElementById(sE[num]); if(sel) sel.textContent='\u2713';
   var pel=document.getElementById(pE[num]); if(pel) pel.textContent=pM[num]+'/'+pM[num]+' pts';
 }
 function completeTask(num, desc, code, output, time, pts) {
-  var tE=['','task1'];
-  var sE=['','t1s'];
-  var pE=['','t1p'];
-  var pM=[0,13.5];
+  var tE=['','task1','task2','task3','task4','task5'];
+  var sE=['','t1s','t2s','t3s','t4s','t5s'];
+  var pE=['','t1p','t2p','t3p','t4p','t5p'];
+  var pM=[0,3,3,2.5,2.5,2.5];
   document.getElementById(tE[num]).className='task-item done';
   document.getElementById(sE[num]).textContent='\u2713';
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
@@ -818,7 +902,11 @@ function generatePDF() {
     'Lab: 2.4.1.9 - Variables: a simple converter',
     'Final Grade: 13.5 / 13.5 points (100%)','',
     'TASK BREAKDOWN',
-    'Task 1 - Complete the simple converter .................... 13.5/13.5 pts',''
+    'Task 1 - Create miles_to_kilometers ....................... 3/3 pts',
+    'Task 2 - Create kilometers_to_miles ....................... 3/3 pts',
+    'Task 3 - Print the miles conversion ....................... 2.5/2.5 pts',
+    'Task 4 - Print the kilometers conversion .................. 2.5/2.5 pts',
+    'Task 5 - Run the full converter ........................... 2.5/2.5 pts',''
   ];
   taskLog.forEach(function(entry){
     info.push('--- '+entry.task+' | '+entry.pts+' pts | '+entry.time+' ---','Code:');
@@ -855,13 +943,21 @@ function fileSafe(value) {
 }
 
 var taskGuidance = {
-  1: 'Task 1 is active. Replace each ### placeholder with the correct variable name or expression so the two conversions print exactly as shown.'
+  1: 'Task 1 is active. Create miles_to_kilometers and set it equal to miles * 1.61.',
+  2: 'Task 2 is active. Create kilometers_to_miles and set it equal to kilometers / 1.61.',
+  3: 'Task 3 is active. Add a print() statement for the miles conversion using round(miles_to_kilometers, 2).',
+  4: 'Task 4 is active. Add a second print() statement for the kilometers conversion using round(kilometers_to_miles, 2).',
+  5: 'Task 5 is active. Run the completed converter and match both expected output lines exactly.'
 };
 var taskHints = {
-  1: 'Hint: Use miles and kilometers in the two calculations, then round the results to 2 decimals.'
+  1: 'Hint: The formula is new variable = miles * 1.61.',
+  2: 'Hint: The formula is new variable = kilometers / 1.61.',
+  3: 'Hint: Use print(miles, "miles is", round(miles_to_kilometers, 2), "kilometers").',
+  4: 'Hint: Use print(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles").',
+  5: 'Hint: The final output should have two lines, one for miles and one for kilometers.'
 };
 function getTaskGuidance() {
-  return currentTask > TOTAL_TASKS ? 'Task 1 is complete. You can download your report.' : taskGuidance[currentTask];
+  return currentTask > TOTAL_TASKS ? 'All five tasks are complete. You can download your report.' : taskGuidance[currentTask];
 }
 
 function isProgressQuestion(text) {
@@ -891,7 +987,11 @@ function getSolutionWaitingMessage(taskNum) {
 
 function containsFullTaskSolution(reply, taskNum) {
   var text = String(reply || '');
-  if (taskNum === 1) return /miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(text) &&
+  if (taskNum === 1) return /miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(text);
+  if (taskNum === 2) return /kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(text);
+  if (taskNum === 3) return /print\s*\(\s*miles\s*,\s*["']miles is["']\s*,\s*round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)\s*,\s*["']kilometers["']\s*\)/.test(text);
+  if (taskNum === 4) return /print\s*\(\s*kilometers\s*,\s*["']kilometers is["']\s*,\s*round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)\s*,\s*["']miles["']\s*\)/.test(text);
+  if (taskNum === 5) return /miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(text) &&
     /kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(text) &&
     /round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)/.test(text) &&
     /round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)/.test(text);
