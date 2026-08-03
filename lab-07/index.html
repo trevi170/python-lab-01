@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2.4.1.9 LAB: Variables: a simple converter</title>
+<title>2.4.1.10 LAB: Operators and expressions</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1d23; color: #cdd6f4; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
@@ -129,7 +129,7 @@ body.resizing-row { cursor: row-resize; user-select: none; }
     <span class="lab-badge">LAB</span>
   </div>
   <div class="topbar-nav">
-    <span>2.4.1.9 LAB: Variables: a simple converter</span>
+    <span>2.4.1.10 LAB: Operators and expressions</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <span id="studentLabel" style="font-size:12px;color:#6c7086;"></span>
@@ -138,8 +138,8 @@ body.resizing-row { cursor: row-resize; user-select: none; }
 </div>
 
 <div class="progress-bars">
-  <div class="prog-item"><span>MODULE (72%)</span><div class="prog-track"><div class="prog-fill" style="width:72%;background:#89b4fa;"></div></div></div>
-  <div class="prog-item"><span>SECTION (82%)</span><div class="prog-track"><div class="prog-fill" style="width:82%;background:#a6e3a1;"></div></div></div>
+  <div class="prog-item"><span>MODULE (74%)</span><div class="prog-track"><div class="prog-fill" style="width:74%;background:#89b4fa;"></div></div></div>
+  <div class="prog-item"><span>SECTION (91%)</span><div class="prog-track"><div class="prog-fill" style="width:91%;background:#a6e3a1;"></div></div></div>
 </div>
 
 <div class="toolbar">
@@ -156,61 +156,48 @@ body.resizing-row { cursor: row-resize; user-select: none; }
 
 <div class="main">
   <div class="left-panel">
-    <h2>Estimated time</h2><p>10 minutes</p>
+    <h2>Estimated time</h2><p>10-15 minutes</p>
     <h2>Level of difficulty</h2><p>Easy</p>
     <h2>Objectives</h2>
     <ul style="padding-left:16px;list-style:disc;color:#a6adc8;font-size:13px;line-height:1.9;">
-      <li>Becoming familiar with variables and simple conversions</li>
-      <li>Working with arithmetic expressions and rounding</li>
-      <li>Reading multiple arguments in <code>print()</code></li>
+      <li>Becoming familiar with numbers, operators, and arithmetic operations in Python</li>
+      <li>Performing basic calculations</li>
+      <li>Using explicit multiplication and exponentiation operators</li>
     </ul>
     <h2>Scenario</h2>
-    <p>Miles and kilometers are units of length or distance. Bearing in mind that 1 mile is equal to approximately 1.61 kilometers, complete the program in the editor so that it converts miles to kilometers and kilometers to miles.</p>
-    <div class="instruction-note"><strong>Work one task at a time:</strong> Add each new line under the matching TODO comment. When a task asks for another line, click at the end of the previous line, press Enter once, and type the new statement on the next line.</div>
+    <p>The code reads a <code>float</code> value into a variable named <code>x</code>. Complete the expression assigned to <code>y</code> so the program evaluates:</p>
+    <p style="font-size:18px;color:#cdd6f4;">3x<sup>3</sup> - 2x<sup>2</sup> + 3x - 1</p>
+    <p>Use Python operators explicitly: multiplication uses <code>*</code> and exponentiation uses <code>**</code>. Test the expression with <code>x = 0</code>, <code>x = 1</code>, and <code>x = -1</code>.</p>
+    <div class="instruction-note"><strong>Work one task at a time:</strong> Keep each test block readable. When a task asks for another test value, copy the pattern on the next lines, change <code>x</code>, and run the code again.</div>
     <h2>Expected output or result</h2>
-    <div class="expected-output-box"><code id="expectedOutput">7.38 miles is 11.88 kilometers
-12.25 kilometers is 7.61 miles</code></div>
+    <div class="expected-output-box"><code id="expectedOutput">y = -1.0
+y = 3.0
+y = -9.0</code></div>
     <div class="complete-banner" id="completeBanner">&#127881; Lab complete! 13.5 / 13.5 points — Download your report above.</div>
     <h2 style="margin-top:14px;">Tasks</h2>
     <div class="task-item active" id="task1">
       <div class="task-status" id="t1s"></div>
       <div class="task-label">
-        <div class="task-summary"><strong>Task 1</strong> — Create the miles-to-kilometers conversion</div>
-        <div class="task-instruction"><strong>What to do:</strong> On a new line below the first TODO, create <code>miles_to_kilometers</code> and set it equal to <code>miles * 1.61</code>.</div>
+        <div class="task-summary"><strong>Task 1</strong> — Evaluate the expression for <code>x = 0</code></div>
+        <div class="task-instruction"><strong>What to do:</strong> Use <code>y = 3 * x**3 - 2 * x**2 + 3 * x - 1</code> and print <code>y = -1.0</code>.</div>
       </div>
-      <div class="task-pts" id="t1p">3 pts</div>
+      <div class="task-pts" id="t1p">4.5 pts</div>
     </div>
     <div class="task-item locked" id="task2">
       <div class="task-status" id="t2s"></div>
       <div class="task-label">
-        <div class="task-summary"><strong>Task 2</strong> — Create the kilometers-to-miles conversion</div>
-        <div class="task-instruction"><strong>What to do:</strong> On a new line below the second TODO, create <code>kilometers_to_miles</code> and set it equal to <code>kilometers / 1.61</code>.</div>
+        <div class="task-summary"><strong>Task 2</strong> — Test the expression for <code>x = 1</code></div>
+        <div class="task-instruction"><strong>What to do:</strong> Add another test block with <code>x = 1</code>, convert it with <code>float(x)</code>, reuse the same expression, and print <code>y = 3.0</code>.</div>
       </div>
-      <div class="task-pts" id="t2p">3 pts</div>
+      <div class="task-pts" id="t2p">4.5 pts</div>
     </div>
     <div class="task-item locked" id="task3">
       <div class="task-status" id="t3s"></div>
       <div class="task-label">
-        <div class="task-summary"><strong>Task 3</strong> — Print the miles conversion</div>
-        <div class="task-instruction"><strong>What to do:</strong> On a new line, print <code>miles</code>, the text <code>miles is</code>, <code>round(miles_to_kilometers, 2)</code>, and the text <code>kilometers</code>.</div>
+        <div class="task-summary"><strong>Task 3</strong> — Test the expression for <code>x = -1</code></div>
+        <div class="task-instruction"><strong>What to do:</strong> Add a final test block with <code>x = -1</code>, reuse the same expression, and produce all three expected output lines.</div>
       </div>
-      <div class="task-pts" id="t3p">2.5 pts</div>
-    </div>
-    <div class="task-item locked" id="task4">
-      <div class="task-status" id="t4s"></div>
-      <div class="task-label">
-        <div class="task-summary"><strong>Task 4</strong> — Print the kilometers conversion</div>
-        <div class="task-instruction"><strong>What to do:</strong> On the next line, print <code>kilometers</code>, the text <code>kilometers is</code>, <code>round(kilometers_to_miles, 2)</code>, and the text <code>miles</code>.</div>
-      </div>
-      <div class="task-pts" id="t4p">2.5 pts</div>
-    </div>
-    <div class="task-item locked" id="task5">
-      <div class="task-status" id="t5s"></div>
-      <div class="task-label">
-        <div class="task-summary"><strong>Task 5</strong> — Run the full converter</div>
-        <div class="task-instruction"><strong>What to do:</strong> Run the completed program with no errors and produce both conversion lines exactly like the expected output.</div>
-      </div>
-      <div class="task-pts" id="t5p">2.5 pts</div>
+      <div class="task-pts" id="t3p">4.5 pts</div>
     </div>
     <div style="height:48px;"></div>
     <div style="position:sticky;bottom:0;background:#1a1d23;padding-top:10px;display:flex;gap:10px;justify-content:flex-end;">
@@ -225,16 +212,10 @@ body.resizing-row { cursor: row-resize; user-select: none; }
       <div class="editor-header">main.py</div>
       <div class="editor-body">
         <div class="line-nums" id="lineNums">1</div>
-        <textarea id="editor" spellcheck="false" oninput="updateLines()" onkeydown="handleTab(event)">kilometers = 12.25
-miles = 7.38
-
-# TODO: Convert miles to kilometers
-
-# TODO: Convert kilometers to miles
-
-# TODO: Print the miles conversion
-
-# TODO: Print the kilometers conversion</textarea>
+        <textarea id="editor" spellcheck="false" oninput="updateLines()" onkeydown="handleTab(event)">x = 0
+x = float(x)
+y = # TODO: complete the expression
+print("y =", y)</textarea>
       </div>
     </div>
     <div class="panel-resizer horizontal-resizer" id="consoleResizer" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabindex="0" title="Drag to resize the console. Double-click to reset."></div>
@@ -255,10 +236,10 @@ miles = 7.38
         </div>
       </div>
       <div class="hint-chips">
-        <div class="chip" onclick="askChip('How do I create the conversion variables?')">Variables</div>
-        <div class="chip" onclick="askChip('How do I calculate miles to kilometers?')">Miles to km</div>
-        <div class="chip" onclick="askChip('How do I calculate kilometers to miles?')">Km to miles</div>
-        <div class="chip" onclick="askChip('How does round() work here?')">round()</div>
+        <div class="chip" onclick="askChip('How do I write multiplication in Python?')">Multiplication</div>
+        <div class="chip" onclick="askChip('How do I use exponentiation?')">Exponentiation</div>
+        <div class="chip" onclick="askChip('Why use float(x)?')">float()</div>
+        <div class="chip" onclick="askChip('What should I test next?')">Next test</div>
       </div>
       <div class="ai-input-row">
         <input type="text" id="aiInput" placeholder="Ask your tutor anything..." onkeydown="if(event.key==='Enter')sendMessage()">
@@ -271,9 +252,9 @@ miles = 7.38
 <script>
 var SUPABASE_URL = 'https://otseertzdwjrfkrdzutu.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90c2VlcnR6ZHdqcmZrcmR6dXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODYzNTYsImV4cCI6MjEwMDU2MjM1Nn0.Wp9xkgiyEjWSgChSL6j20V7YtUxadq9H8UPpm2ip6RM';
-var LAB_NUM = 9;
+var LAB_NUM = 6;
 var LAB_PTS = 13.5;
-var TOTAL_TASKS = 5;
+var TOTAL_TASKS = 3;
 
 var student = {};
 var labStartTime = new Date();
@@ -333,7 +314,7 @@ function initLab() {
     document.getElementById('scoreDisplay').textContent = String(LAB_PTS);
     document.getElementById('welcomeMsg').textContent = 'Welcome back ' + student.firstName + '! You already completed this lab. You can review or download your report.';
   } else {
-  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 - create the miles-to-kilometers conversion.';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 - complete the expression for x = 0.';
   }
 
   restoreEditorDraft();
@@ -349,21 +330,17 @@ initLab();
 loadSavedProgress();
 
 function completedTaskCountForPoints(points) {
-  if (points >= 13.5) return 5;
-  if (points >= 11) return 4;
-  if (points >= 8.5) return 3;
-  if (points >= 6) return 2;
-  if (points >= 3) return 1;
+  if (points >= 13.5) return 3;
+  if (points >= 9) return 2;
+  if (points >= 4.5) return 1;
   return 0;
 }
 
 function updateExpectedOutput() {
   var expected = {
-    1: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
-    2: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
-    3: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
-    4: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles',
-    5: '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles'
+    1: 'y = -1.0',
+    2: 'y = -1.0\ny = 3.0',
+    3: 'y = -1.0\ny = 3.0\ny = -9.0'
   };
   document.getElementById('expectedOutput').textContent =
     currentTask > TOTAL_TASKS ? 'Lab complete — 13.5 / 13.5 points' : expected[currentTask];
@@ -617,14 +594,13 @@ function handleTab(e) {
   updateLines();
 }
 
-var FINAL_OUTPUT = '7.38 miles is 11.88 kilometers\n12.25 kilometers is 7.61 miles';
-var STARTER_CODE = 'kilometers = 12.25\nmiles = 7.38\n\n# TODO: Convert miles to kilometers\n\n# TODO: Convert kilometers to miles\n\n# TODO: Print the miles conversion\n\n# TODO: Print the kilometers conversion';
+var FINAL_OUTPUT = 'y = -1.0\ny = 3.0\ny = -9.0';
+var EXPRESSION_PATTERN = /y\s*=\s*3\s*\*\s*x\s*\*\*\s*3\s*-\s*2\s*\*\s*x\s*\*\*\s*2\s*\+\s*3\s*\*\s*x\s*-\s*1/;
+var STARTER_CODE = 'x = 0\nx = float(x)\ny = # TODO: complete the expression\nprint("y =", y)';
 var TASK_SOLUTIONS = {
-  1: 'miles_to_kilometers = miles * 1.61',
-  2: 'kilometers_to_miles = kilometers / 1.61',
-  3: 'print(miles, "miles is", round(miles_to_kilometers, 2), "kilometers")',
-  4: 'print(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles")',
-  5: 'miles_to_kilometers = miles * 1.61\nkilometers_to_miles = kilometers / 1.61\nprint(miles, "miles is", round(miles_to_kilometers, 2), "kilometers")\nprint(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles")'
+  1: 'x = 0\nx = float(x)\ny = 3 * x**3 - 2 * x**2 + 3 * x - 1\nprint("y =", y)',
+  2: 'x = 1\nx = float(x)\ny = 3 * x**3 - 2 * x**2 + 3 * x - 1\nprint("y =", y)',
+  3: 'x = -1\nx = float(x)\ny = 3 * x**3 - 2 * x**2 + 3 * x - 1\nprint("y =", y)'
 };
 
 function resetCode() {
@@ -642,10 +618,10 @@ function resetLabToScratch() {
   currentTask = 1;
   viewedTask = 1;
   progressSaveErrorShown = false;
-  var taskIds = ['','task1','task2','task3','task4','task5'];
-  var statusIds = ['','t1s','t2s','t3s','t4s','t5s'];
-  var pointIds = ['','t1p','t2p','t3p','t4p','t5p'];
-  var pointValues = [0,3,3,2.5,2.5,2.5];
+  var taskIds = ['','task1','task2','task3'];
+  var statusIds = ['','t1s','t2s','t3s'];
+  var pointIds = ['','t1p','t2p','t3p'];
+  var pointValues = [0,4.5,4.5,4.5];
   for (var i = 1; i <= TOTAL_TASKS; i++) {
     document.getElementById(taskIds[i]).className = 'task-item ' + (i === 1 ? 'active' : 'locked');
     document.getElementById(statusIds[i]).textContent = '';
@@ -658,7 +634,7 @@ function resetLabToScratch() {
   banner.textContent = '\uD83C\uDF89 Lab complete! 13.5 / 13.5 points \u2014 Download your report above.';
   document.getElementById('pdfBtn').style.display = 'none';
   document.getElementById('scoreDisplay').textContent = '0';
-  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 - create the miles-to-kilometers conversion.';
+  document.getElementById('welcomeMsg').textContent = 'Welcome ' + student.firstName + '! Start with Task 1 - complete the expression for x = 0.';
   var info = sessionStorage.getItem('lab_info');
   if (info) {
     try {
@@ -703,6 +679,10 @@ function splitTopLevelCommas(text) {
   if (current.trim()) parts.push(current.trim());
   return parts;
 }
+function formatPythonValue(value) {
+  if (typeof value === 'number' && Number.isInteger(value)) return value.toFixed(1);
+  return String(value);
+}
 function evalSimpleExpression(expr, vars) {
   var text = expr.trim();
   if (/^["']((?:\\.|[^\\])*?)["']$/.test(text)) {
@@ -715,6 +695,8 @@ function evalSimpleExpression(expr, vars) {
     return vars[text];
   }
   if (/^-?\d+(?:\.\d+)?$/.test(text)) return Number(text);
+  var floatMatch = text.match(/^float\s*\(\s*([A-Za-z_][A-Za-z0-9_]*|-?\d+(?:\.\d+)?)\s*\)$/);
+  if (floatMatch) return Number(evalSimpleExpression(floatMatch[1], vars));
   var roundMatch = text.match(/^round\s*\(\s*(.+)\s*,\s*(\d+)\s*\)$/);
   if (roundMatch) {
     var roundedValue = Number(evalSimpleExpression(roundMatch[1], vars));
@@ -732,6 +714,17 @@ function evalSimpleExpression(expr, vars) {
     var left = evalSimpleExpression(divMatch[1], vars);
     var right = evalSimpleExpression(divMatch[2], vars);
     return Number(left) / Number(right);
+  }
+  if (/^[A-Za-z0-9_\s+\-*/().]+$/.test(text)) {
+    var jsExpr = text.replace(/\b[A-Za-z_][A-Za-z0-9_]*\b/g, function(name) {
+      if (!(name in vars)) throw new Error('NameError: name \'' + name + '\' is not defined');
+      return '(' + Number(vars[name]) + ')';
+    });
+    try {
+      return Function('"use strict"; return (' + jsExpr + ');')();
+    } catch(e) {
+      throw new Error('SyntaxError: unsupported expression ' + text);
+    }
   }
   var addParts = text.split(/\+/);
   if (addParts.length > 1) {
@@ -781,7 +774,7 @@ function simulatePython(code) {
           sep = decodePythonString(sepMatch[2]);
           continue;
         }
-        evaluated.push(String(evalSimpleExpression(arg, vars)));
+        evaluated.push(formatPythonValue(evalSimpleExpression(arg, vars)));
       }
       var value = evaluated.join(sep);
       output += value + '\n';
@@ -818,58 +811,44 @@ function gradeError(error) {
 function gradeSuccess(code, sim, now) {
   var output = sim.text.replace(/\n$/, '');
   if (currentTask === 1) {
-    if (/miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(code)) {
-      completeTask(1,'Created miles_to_kilometers',code,output,now,3);
-      addAiMessage('Task 1 done! Now create kilometers_to_miles by dividing kilometers by 1.61.');
+    if (/x\s*=\s*0/.test(code) && /x\s*=\s*float\s*\(\s*x\s*\)/.test(code) &&
+        EXPRESSION_PATTERN.test(code) && output.indexOf('y = -1') !== -1) {
+      completeTask(1,'Evaluated the expression for x = 0',code,output,now,4.5);
+      addAiMessage('Task 1 done! Now add a second test block for x = 1 using the same expression.');
     } else {
-      addAiMessage('Create miles_to_kilometers with miles * 1.61, then run the code again.');
+      addAiMessage('Complete the y expression for x = 0 using 3 * x**3 - 2 * x**2 + 3 * x - 1.');
     }
   } else if (currentTask === 2) {
-    if (/kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(code)) {
-      completeTask(2,'Created kilometers_to_miles',code,output,now,3);
-      addAiMessage('Task 2 done! Now add the first print() statement for the miles conversion.');
+    if (/x\s*=\s*1/.test(code) && EXPRESSION_PATTERN.test(code) &&
+        output.indexOf('y = -1') !== -1 && output.indexOf('y = 3') !== -1) {
+      completeTask(2,'Tested the expression for x = 1',code,output,now,4.5);
+      addAiMessage('Task 2 done! Now add the final test block for x = -1.');
     } else {
-      addAiMessage('Create kilometers_to_miles with kilometers / 1.61, then run the code again.');
+      addAiMessage('Add another block for x = 1 and reuse the same y expression.');
     }
   } else if (currentTask === 3) {
-    if (/print\s*\(\s*miles\s*,\s*["']miles is["']\s*,\s*round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)\s*,\s*["']kilometers["']\s*\)/.test(code) &&
-        output.indexOf('7.38 miles is 11.88 kilometers') !== -1) {
-      completeTask(3,'Printed the miles conversion',code,output,now,2.5);
-      addAiMessage('Task 3 done! Now add the second print() statement for the kilometers conversion on the next line.');
-    } else {
-      addAiMessage('Add the print() statement for miles using round(miles_to_kilometers, 2).');
-    }
-  } else if (currentTask === 4) {
-    if (/print\s*\(\s*kilometers\s*,\s*["']kilometers is["']\s*,\s*round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)\s*,\s*["']miles["']\s*\)/.test(code) &&
-        output.indexOf('12.25 kilometers is 7.61 miles') !== -1) {
-      completeTask(4,'Printed the kilometers conversion',code,output,now,2.5);
-      addAiMessage('Task 4 done! Run the completed converter once more to finish the lab.');
-    } else {
-      addAiMessage('Add the print() statement for kilometers using round(kilometers_to_miles, 2).');
-    }
-  } else if (currentTask === 5) {
     if (output === FINAL_OUTPUT) {
-      completeTask(5,'Ran the full converter successfully',code,output,now,2.5);
-      addAiMessage('Task 5 done! This lab is complete - great work with variables and conversions.');
+      completeTask(3,'Tested the expression for x = -1',code,output,now,4.5);
+      addAiMessage('Task 3 done! This lab is complete - great work with operators and expressions.');
     } else {
-      addAiMessage('Run the completed program again and make sure both output lines match the expected output exactly.');
+      addAiMessage('Add the final block for x = -1 and make sure all three output lines match the expected output.');
     }
   }
 }
 function completeTaskSilent(num) {
-  var tE=['','task1','task2','task3','task4','task5'];
-  var sE=['','t1s','t2s','t3s','t4s','t5s'];
-  var pE=['','t1p','t2p','t3p','t4p','t5p'];
-  var pM=[0,3,3,2.5,2.5,2.5];
+  var tE=['','task1','task2','task3'];
+  var sE=['','t1s','t2s','t3s'];
+  var pE=['','t1p','t2p','t3p'];
+  var pM=[0,4.5,4.5,4.5];
   var el=document.getElementById(tE[num]); if(el) el.className='task-item done';
   var sel=document.getElementById(sE[num]); if(sel) sel.textContent='\u2713';
   var pel=document.getElementById(pE[num]); if(pel) pel.textContent=pM[num]+'/'+pM[num]+' pts';
 }
 function completeTask(num, desc, code, output, time, pts) {
-  var tE=['','task1','task2','task3','task4','task5'];
-  var sE=['','t1s','t2s','t3s','t4s','t5s'];
-  var pE=['','t1p','t2p','t3p','t4p','t5p'];
-  var pM=[0,3,3,2.5,2.5,2.5];
+  var tE=['','task1','task2','task3'];
+  var sE=['','t1s','t2s','t3s'];
+  var pE=['','t1p','t2p','t3p'];
+  var pM=[0,4.5,4.5,4.5];
   document.getElementById(tE[num]).className='task-item done';
   document.getElementById(sE[num]).textContent='\u2713';
   document.getElementById(pE[num]).textContent=pM[num]+'/'+pM[num]+' pts';
@@ -899,14 +878,12 @@ function generatePDF() {
     'Course: '+student.course+'   Section: '+student.section,
     'Instructor: '+student.instructor,
     'Date: '+now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'   Start: '+labStartTime.toLocaleTimeString(),
-    'Lab: 2.4.1.9 - Variables: a simple converter',
+    'Lab: 2.4.1.10 - Operators and expressions',
     'Final Grade: 13.5 / 13.5 points (100%)','',
     'TASK BREAKDOWN',
-    'Task 1 - Create miles_to_kilometers ....................... 3/3 pts',
-    'Task 2 - Create kilometers_to_miles ....................... 3/3 pts',
-    'Task 3 - Print the miles conversion ....................... 2.5/2.5 pts',
-    'Task 4 - Print the kilometers conversion .................. 2.5/2.5 pts',
-    'Task 5 - Run the full converter ........................... 2.5/2.5 pts',''
+    'Task 1 - Evaluate the expression for x = 0 ................ 4.5/4.5 pts',
+    'Task 2 - Test the expression for x = 1 .................... 4.5/4.5 pts',
+    'Task 3 - Test the expression for x = -1 ................... 4.5/4.5 pts',''
   ];
   taskLog.forEach(function(entry){
     info.push('--- '+entry.task+' | '+entry.pts+' pts | '+entry.time+' ---','Code:');
@@ -930,7 +907,7 @@ function generatePDF() {
   offsets.forEach(function(offset){pdf+=String(offset).padStart(10,'0')+' 00000 n \n';});
   pdf+='trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
   var blob=new Blob([pdf],{type:'application/pdf'}), url=URL.createObjectURL(blob);
-  var a=document.createElement('a'); a.href=url; a.download='Lab6_Report_'+fileSafe(student.lastName)+'_'+fileSafe(student.firstName)+'.pdf';
+  var a=document.createElement('a'); a.href=url; a.download='Lab7_Report_'+fileSafe(student.lastName)+'_'+fileSafe(student.firstName)+'.pdf';
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
@@ -943,21 +920,17 @@ function fileSafe(value) {
 }
 
 var taskGuidance = {
-  1: 'Task 1 is active. Create miles_to_kilometers and set it equal to miles * 1.61.',
-  2: 'Task 2 is active. Create kilometers_to_miles and set it equal to kilometers / 1.61.',
-  3: 'Task 3 is active. Add a print() statement for the miles conversion using round(miles_to_kilometers, 2).',
-  4: 'Task 4 is active. Add a second print() statement for the kilometers conversion using round(kilometers_to_miles, 2).',
-  5: 'Task 5 is active. Run the completed converter and match both expected output lines exactly.'
+  1: 'Task 1 is active. Complete y for x = 0 using 3 * x**3 - 2 * x**2 + 3 * x - 1.',
+  2: 'Task 2 is active. Add a second test block for x = 1 using the same y expression.',
+  3: 'Task 3 is active. Add a final test block for x = -1 and match all three expected output lines.'
 };
 var taskHints = {
-  1: 'Hint: The formula is new variable = miles * 1.61.',
-  2: 'Hint: The formula is new variable = kilometers / 1.61.',
-  3: 'Hint: Use print(miles, "miles is", round(miles_to_kilometers, 2), "kilometers").',
-  4: 'Hint: Use print(kilometers, "kilometers is", round(kilometers_to_miles, 2), "miles").',
-  5: 'Hint: The final output should have two lines, one for miles and one for kilometers.'
+  1: 'Hint: Use * between numbers and variables, and use ** for powers.',
+  2: 'Hint: Copy the x = 0 block, change the first line to x = 1, and keep the same y expression.',
+  3: 'Hint: Copy the same block one more time, change the first line to x = -1, and run all three tests.'
 };
 function getTaskGuidance() {
-  return currentTask > TOTAL_TASKS ? 'All five tasks are complete. You can download your report.' : taskGuidance[currentTask];
+  return currentTask > TOTAL_TASKS ? 'All three tasks are complete. You can download your report.' : taskGuidance[currentTask];
 }
 
 function isProgressQuestion(text) {
@@ -987,14 +960,9 @@ function getSolutionWaitingMessage(taskNum) {
 
 function containsFullTaskSolution(reply, taskNum) {
   var text = String(reply || '');
-  if (taskNum === 1) return /miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(text);
-  if (taskNum === 2) return /kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(text);
-  if (taskNum === 3) return /print\s*\(\s*miles\s*,\s*["']miles is["']\s*,\s*round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)\s*,\s*["']kilometers["']\s*\)/.test(text);
-  if (taskNum === 4) return /print\s*\(\s*kilometers\s*,\s*["']kilometers is["']\s*,\s*round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)\s*,\s*["']miles["']\s*\)/.test(text);
-  if (taskNum === 5) return /miles_to_kilometers\s*=\s*miles\s*\*\s*1\.61/.test(text) &&
-    /kilometers_to_miles\s*=\s*kilometers\s*\/\s*1\.61/.test(text) &&
-    /round\s*\(\s*miles_to_kilometers\s*,\s*2\s*\)/.test(text) &&
-    /round\s*\(\s*kilometers_to_miles\s*,\s*2\s*\)/.test(text);
+  if (taskNum === 1) return /x\s*=\s*0/.test(text) && EXPRESSION_PATTERN.test(text);
+  if (taskNum === 2) return /x\s*=\s*1/.test(text) && EXPRESSION_PATTERN.test(text);
+  if (taskNum === 3) return /x\s*=\s*-\s*1/.test(text) && EXPRESSION_PATTERN.test(text);
   return false;
 }
 
@@ -1034,7 +1002,7 @@ async function sendMessage() {
       'Authorization':'Bearer '+SUPABASE_KEY
     },
       body:JSON.stringify({
-        system:'You are a friendly Python tutor for beginners learning variables, arithmetic, and string formatting. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. The application says the full solution is currently '+(solutionUnlocked?'available':'not available')+'. When it is not available, give a useful hint instead. Never mention attempt counts, thresholds, unlock rules, or promise that a solution will be provided later. If the lab is complete, never say a task is active.',
+        system:'You are a friendly Python tutor for beginners learning numbers, arithmetic operators, exponentiation, and expressions. Keep answers 2-4 sentences, warm, and jargon-free. The student is '+student.firstName+'. AUTHORITATIVE LAB STATE: '+activeGuidance+' Treat this as authoritative. Never claim a later task is next or active. The application says the full solution is currently '+(solutionUnlocked?'available':'not available')+'. When it is not available, give a useful hint instead. Never mention attempt counts, thresholds, unlock rules, or promise that a solution will be provided later. If the lab is complete, never say a task is active.',
         context:{activeTask:activeTask,completedTasks:Math.max(0,currentTask-1),labComplete:complete,solutionUnlocked:solutionUnlocked,taskInstructions:activeGuidance,code:currentCode},
         messages:[{role:'user',content:(complete?'The lab is complete. Do not refer to a task as active.':'The active task is Task '+activeTask+'. Do not advance me to another task. Follow the application solution-availability state and never discuss its policy.')+'\\n\\nCurrent code:\\n```python\\n'+currentCode+'\\n```\\n\\nQuestion: '+text}]
       })});
